@@ -3,9 +3,13 @@ package open.dolphin.impl.orcon;
 import org.openqa.selenium.Keys;
 
 import java.awt.event.KeyEvent;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
-public class KeyConvert {
+/**
+ * Selenium の Keys と KeyEvent を関連付ける.
+ * @author pns
+ */
+public class KeyUtils {
 
     public static Keys[] TYPING_KEYS = new Keys[] {
         Keys.ENTER, Keys.TAB, Keys.BACK_SPACE, Keys.DELETE, Keys.SEMICOLON,
@@ -73,7 +77,12 @@ public class KeyConvert {
         };
     }
 
+    /**
+     * KeyTyped で処理されるキーかどうかを返す.
+     * @param key target key
+     * @return true if the key should be processed through KeyTyped
+     */
     public static boolean isTypingKey(Keys key) {
-        return Stream.of(TYPING_KEYS).anyMatch(key::equals);
+        return Arrays.asList(TYPING_KEYS).contains(key);
     }
 }

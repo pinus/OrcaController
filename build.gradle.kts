@@ -1,19 +1,69 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import java.text.SimpleDateFormat
+import java.util.*
+
+val conveyorCommand = "/Applications/Conveyor.app/Contents/MacOS/conveyor"
+val conveyorInputDir = "${projectDir}/output"
+val buildDate:String = SimpleDateFormat("yyyyMMddHHmm").format(Date())
+
 plugins {
-    id("java")
+    application
+    kotlin("jvm") version "2.0.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "open.dolphin.impl.orcon"
-version = "1.0-SNAPSHOT"
+application {
+    mainClass = "open.dolphin.impl.orcon.OrcaController"
+}
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+tasks {
+    named<ShadowJar>("shadowJar") {
+        mergeServiceFiles()
+        manifest {
+            attributes(mapOf("Main-Class" to application.mainClass))
+        }
+    }
+    val deleteConveyorOutput = register<Delete>("delete-conveyor-output") {
+        delete(conveyorInputDir)
+    }
+    val conveyor = register<Exec>("conveyor") {
+        group = "distribution"
+        description = "make app"
+        dependsOn.add(shadowJar)
+        dependsOn.add(deleteConveyorOutput)
+        workingDir(projectDir)
+        val jarName = shadowJar.get().archiveFileName.get()
+        val projectVersion = project.property("version")
+        val javaVersion = project.property("java.version")
+        commandLine = (listOf(
+            conveyorCommand,
+            "-Kjar.name=${jarName}",
+            "-Kproject.version=${projectVersion}",
+            "-Kbuild.date=${buildDate}",
+            "-Kjava.version=${javaVersion}",
+            "-Kapp.machines=mac.aarch64",
+            "make", "mac-app"))
+
+    }
+    register<Exec>("tar") {
+        group = "distribution"
+        description = "make tar"
+        dependsOn.add(conveyor)
+        commandLine = (listOf(
+            "tar", "czf", "${conveyorInputDir}/OrcaController-${buildDate}.tgz",
+            "-C", conveyorInputDir, "OrcaController.app"))
+    }
+    clean {
+        dependsOn(deleteConveyorOutput)
+    }
 }
 
-tasks.test {
-    useJUnitPlatform()
+dependencies {
+    implementation("org.seleniumhq.selenium:selenium-java:4.26.0")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+    implementation("commons-io:commons-io:2.16.1")
 }

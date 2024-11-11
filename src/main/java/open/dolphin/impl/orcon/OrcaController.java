@@ -20,13 +20,19 @@ import java.util.prefs.Preferences;
  * @author pns
  */
 public class OrcaController {
-    private final OrconPanel orconPanel;
-    private final OrconProperties orconProps;
+    private OrconPanel orconPanel;
+    private OrconProperties orconProps;
     private final Logger logger;
 
     public OrcaController() {
-        // init components
         logger = LoggerFactory.getLogger(OrcaController.class);
+    }
+
+    public JPanel getUI() {
+        return orconPanel.getPanel();
+    }
+
+    public void start() {
         orconPanel = new OrconPanel();
         orconPanel.setLoginState(false);
 
@@ -43,9 +49,7 @@ public class OrcaController {
         orconPanel.getCloseButton().addActionListener(e -> macro.close());
     }
 
-    public JPanel getUI() {
-        return orconPanel.getPanel();
-    }
+    public void stop() {}
 
     private static void redirectConsole() {
         try {
@@ -69,6 +73,7 @@ public class OrcaController {
     public static void main(String[] args) {
         redirectConsole();
         OrcaController orcon = new OrcaController();
+        orcon.start();
         Preferences prefs = Preferences.userNodeForPackage(OrconProperties.class);
 
         int x = prefs.getInt("JFLAME_X", 100);

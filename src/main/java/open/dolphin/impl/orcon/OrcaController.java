@@ -6,9 +6,6 @@ import org.apache.commons.io.output.TeeOutputStream;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.desktop.QuitEvent;
-import java.awt.desktop.QuitHandler;
-import java.awt.desktop.QuitResponse;
 import java.awt.event.*;
 import java.io.FileOutputStream;
 import java.io.IOException;

@@ -29,10 +29,21 @@ public class Macro {
     private final OrconProperties props;
     private final Logger logger;
 
+    // 患者番号
+    private String ptnum = "";
+
     public Macro(OrconPanel orconPanel, OrconProperties orconProperties) {
         panel = orconPanel;
         props = orconProperties;
         logger = LoggerFactory.getLogger(Macro.class);
+    }
+
+    /**
+     * 送信する患者番号をセットする.
+     * @param ptnum patient number
+     */
+    public void setPatientNumber(String ptnum) {
+        this.ptnum = ptnum;
     }
 
     /**
@@ -111,7 +122,7 @@ public class Macro {
     /**
      * (K02)診療行為入力: 外来管理加算削除
      */
-    public void gairaiKanriKensaku() {
+    public void gairaiKanriDelete() {
         logger.info("外来管理加算削除");
         // list of "入力コード" column
         List<WebElement> elements = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div[6]/div/div[19]/table/tbody/tr/td[2]/input"));
@@ -145,6 +156,7 @@ public class Macro {
      * @param n 0:全て印刷しない, 1: 領収書のみ印刷, 2: 処方箋のみ印刷, 3:両方印刷
      */
     public void printForms(int n) {
+        logger.info("印刷帳票選択");
         WebElement ryosyusyoElement = driver.findElement(By.id(領収書.id));
         WebElement meisaisyoElement = driver.findElement(By.id(明細書.id));
         WebElement syohoElement = driver.findElement(By.id(処方箋.id));
@@ -165,12 +177,34 @@ public class Macro {
     }
 
     /**
+     * (K02) K02.fixed2.PTNUM, (C02)病名登録 C02.fixed6.PTNUM
+     */
+    public void sendPtNum() {
+        logger.info("患者番号送信 " + ptnum);
+        if (!ptnum.isEmpty()) {
+            WebElement test = driver.findElement(By.id(診療行為患者番号.id));
+            if (test.isDisplayed()) {
+                test.sendKeys(ptnum);
+                return;
+            }
+            test = driver.findElement(By.id(病名登録患者番号.id));
+            if (test.isDisplayed()) {
+                test.sendKeys(ptnum);
+            }
+        }
+    }
+
+    /**
      * activeElement にキーを流す.
      * @param chord charsequence
      */
     public void sendThrough(CharSequence chord) {
-        WebElement activeElement = driver.switchTo().activeElement();
-        activeElement.sendKeys(Keys.chord(chord));
+        try {
+            WebElement activeElement = driver.switchTo().activeElement();
+            activeElement.sendKeys(Keys.chord(chord));
+        } catch (RuntimeException ex) {
+            logger.error(ex.getMessage());
+        }
     }
 
     /**

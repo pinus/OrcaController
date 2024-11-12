@@ -19,26 +19,31 @@ import java.util.prefs.Preferences;
  * オルコン: ORCA を遠隔操作する.
  * @author pns
  */
-public class OrcaController {
+public class OrcaController { //extends AbstractMainComponent {
+    private static final String NAME = "オルコン";
     private OrconPanel orconPanel;
     private OrconProperties orconProps;
+    private Macro macro;
     private final Logger logger;
 
     public OrcaController() {
+        //setName(NAME);
         logger = LoggerFactory.getLogger(OrcaController.class);
     }
 
+    //@Override
     public JPanel getUI() {
         return orconPanel.getPanel();
     }
 
+    //@Override
     public void start() {
         orconPanel = new OrconPanel();
         orconPanel.setLoginState(false);
 
         orconProps = new OrconProperties(orconPanel);
         orconProps.modelToView();
-        Macro macro = new Macro(orconPanel, orconProps);
+        macro = new Macro(orconPanel, orconProps);
 
         // Listen KeyEvent on the close button,
         // which is the only component enabled after orca login
@@ -47,9 +52,15 @@ public class OrcaController {
         orconPanel.getCloseButton().setFocusTraversalKeysEnabled(false); // tab を取られないように
         orconPanel.getLoginButton().addActionListener(e -> macro.login());
         orconPanel.getCloseButton().addActionListener(e -> macro.close());
+
+        //getContext().getFrame().getRootPane().setDefaultButton(orconPanel.getLoginButton());
     }
 
-    public void stop() {}
+//    @Override
+//    public void enter() {}
+
+//    @Override
+//    public void stop() {}
 
     private static void redirectConsole() {
         try {

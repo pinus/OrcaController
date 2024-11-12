@@ -12,6 +12,7 @@ public enum OrcaElements {
     業務メニュー選択番号("M01.fixed1.SELNUM"),
 
     診療行為("K02"),
+    診療行為患者番号("K02.fixed2.PTNUM"),
     中途表示ボタン("K02.fixed2.B12CS"),
     病名登録ボタン("K02.fixed2.B07S"),
     中途終了選択番号("K10.fixed1.SELNUM"),
@@ -22,6 +23,7 @@ public enum OrcaElements {
     処方箋("K03.fixed3.SYOHOPRTFLGCOMBO.SYOHOPRTFLG"),
 
     病名登録タイトル("C02"),
+    病名登録患者番号("C02.fixed6.PTNUM"),
 
     エラー閉じるボタン("KERR.fixed1.B01")
     ;

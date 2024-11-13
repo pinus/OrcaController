@@ -62,6 +62,9 @@ public class OrcaController { //extends AbstractMainComponent {
 //    @Override
 //    public void stop() {}
 
+//    @Override
+//    public Callable<Boolean> getStoppingTask() {}
+
     private static void redirectConsole() {
         try {
             String applicationSupportDir = System.getProperty("user.home") + "/Library/Application Support/OrcaController/";

@@ -3,10 +3,8 @@ package open.dolphin.impl.orcon;
 import org.openqa.selenium.Keys;
 
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Selenium の Keys と KeyEvent を関連付ける.

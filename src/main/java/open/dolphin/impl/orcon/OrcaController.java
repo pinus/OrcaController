@@ -103,7 +103,7 @@ public class OrcaController { //extends AbstractMainComponent {
         frame.add(orcon.getUI());
         frame.getRootPane().setDefaultButton(orcon.orconPanel.getLoginButton());
 
-        frame.addWindowListener(new WindowAdapter() {
+        frame.addWindowListener(new WindowListener() {
             @Override
             public void windowClosed(WindowEvent e) {
                 prefs.putInt("JFLAME_X", frame.getBounds().x);
@@ -113,6 +113,25 @@ public class OrcaController { //extends AbstractMainComponent {
                 System.out.println("prefs saved");
                 System.exit(0);
             }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+                orcon.orconPanel.setActive(orcon.orconPanel.getCloseButton().isEnabled());
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                orcon.orconPanel.setActive(false);
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
         });
 
         Desktop desktop = Desktop.getDesktop();

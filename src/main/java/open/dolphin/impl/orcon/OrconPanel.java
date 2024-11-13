@@ -20,6 +20,7 @@ public class OrconPanel {
     private JPasswordField passwordField;
     private JButton loginButton;
     private JButton closeButton;
+    private JLabel messageLabel;
 
     public OrconPanel() {
         initComponents();
@@ -97,10 +98,15 @@ public class OrconPanel {
         layouter.setConstraints(buttonPanel, 0, 2, GridBagConstraints.REMAINDER, 1);
         orconPanel.add(buttonPanel);
 
-        JLabel dummy = new JLabel("ORCA Controller");
-        //dummy.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 28));
-        layouter.setConstraints(dummy, 0,3, GridBagConstraints.REMAINDER, GridBagConstraints.REMAINDER, 1, 1);
-        orconPanel.add(dummy);
+        messageLabel = new JLabel("ORCA Controller");
+        messageLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 28));
+        layouter.setConstraints(messageLabel, 0,3, GridBagConstraints.REMAINDER, GridBagConstraints.REMAINDER, 1, 1);
+        orconPanel.add(messageLabel);
+    }
+
+    public void setActive(boolean active) {
+        messageLabel.setText("ORCA Controller " + (active? "Listening" : "Idling"));
+        messageLabel.setForeground(active? Color.BLACK : Color.LIGHT_GRAY);
     }
 
     /**

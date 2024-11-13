@@ -37,58 +37,51 @@ public class ShortcutListener implements KeyListener {
     }
 
     /**
-     * sendThrough マクロを実行.
-     * @param key selenium Keys (CharSequence)
+     * KeyEvent を CharSequence に変換して selenium に流す.
+     * @param e KeyEvent
      */
-    private void sendThrough(CharSequence key) {
+    private void sendThrough(KeyEvent e) {
+        //logger.info("pressed = " + e);
+        // 単独 modifier は受けない
+        if (KeyUtils.isModifier(e.getKeyCode())) { return; }
+
+        // modifier を selenium Keys に変換してセット
         StringBuilder chord = new StringBuilder();
         if (shift) { chord.append(Keys.SHIFT); }
         if (ctrl) { chord.append(Keys.CONTROL); }
         if (alt) { chord.append(Keys.ALT); }
         if (meta) { chord.append(Keys.META); }
-        chord.append(key);
+        // 特殊キーを selenium Keys に変換
+        Keys specialKey = KeyUtils.toSeleniumKey(e.getKeyCode());
+        if (specialKey != null) {
+            logger.info("specialKey = " + specialKey);
+            chord.append(specialKey);
+        } else {
+            // 通常キーは getChar で受ける
+            logger.info("normal key = " + e.getKeyChar());
+            chord.append(e.getKeyChar());
+        }
+//        for (int i=0; i<chord.length(); i++) {
+//            int specialKeyCode = KeyUtils.toKeyCode(chord.charAt(i));
+//            String keytext = specialKeyCode < 65535?
+//                KeyEvent.getKeyText(specialKeyCode) : String.valueOf(chord.charAt(i));
+//            logger.info(String.format("chord[%d] keyCode:%d converted:%d keyChar:%s(%d) charInChord:%s(%s)",
+//                i, e.getKeyCode(), specialKeyCode, e.getKeyChar(), (int)e.getKeyChar(), chord.charAt(i), keytext));
+//        }
+
         macro.sendThrough(chord);
     }
 
     /**
-     * 通常の文字, shift, tab, backspace, enter などの typingKey はこちらで処理.
-     * @param e the event to be processed
-     */
-    @Override
-    public void keyTyped(KeyEvent e) {
-        setModifierState(e);
-        if (alt || ctrl) { return; }
-
-        // そのまま流す
-        String key = String.valueOf(e.getKeyChar());
-        //logger.info("typed: " + key);
-        sendThrough(key);
-        e.consume();
-    }
-
-    /**
-     * keyTyped で取れない alt, ctrl, fn キーなどははこちらで処理.
+     * ショートカット処理.
      * @param e the event to be processed
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        // 単独 modifier は受けない
-        if (e.getKeyCode() == KeyEvent.VK_SHIFT || e.getKeyCode() == KeyEvent.VK_CONTROL
-            || e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META) {
-            return;
-        }
-
         setModifierState(e);
-        Keys key = KeyUtils.toSeleniumKey(e.getKeyCode()); // 特殊キー以外は Keys.NULL
-
-        // 以下のキーは, typed で処理されるのでスキップ
-        if (!ctrl && !alt && !meta && KeyUtils.isTypingKey(key)) {
-            return;
-        }
-
-        //logger.info("pressed: " + KeyEvent.getKeyText(e.getKeyCode()));
-
+        //
         // ショートカットキーでマクロを呼ぶ
+        //
         if (ctrl && e.getKeyCode() == KeyEvent.VK_ENTER) {
             // 中途終了展開 CTRL + ENTER
             macro.chutoTenkai();
@@ -97,23 +90,26 @@ public class ShortcutListener implements KeyListener {
             // 外来管理加算削除 CTRL + K
             macro.gairaiKanriDelete();
 
-        } else if (ctrl & e.getKeyCode() == KeyEvent.VK_B) {
+        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_B) {
             // (C02)病名登録へ移動
             macro.byomeiToroku();
 
-        } else if (ctrl & (e.getKeyCode() == KeyEvent.VK_0 || e.getKeyCode() == KeyEvent.VK_1 || e.getKeyCode() == KeyEvent.VK_2)) {
+        } else if (ctrl && (e.getKeyCode() == KeyEvent.VK_0 || e.getKeyCode() == KeyEvent.VK_1 || e.getKeyCode() == KeyEvent.VK_2)) {
             // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
             macro.printForms(e.getKeyCode() - KeyEvent.VK_0);
 
-        } else if (ctrl & e.getKeyCode() == KeyEvent.VK_T) {
+        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_V) {
             // 患者番号送信
             macro.sendPtNum();
 
         } else {
             // ショートカットキー以外は, そのまま流す
-            sendThrough(String.valueOf((char) e.getKeyCode()));
+            sendThrough(e);
         }
     }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyReleased(KeyEvent e) {}

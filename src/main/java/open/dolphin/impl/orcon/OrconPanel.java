@@ -22,6 +22,11 @@ public class OrconPanel {
     private JButton closeButton;
     private JLabel messageLabel;
 
+    private JButton btn1 = new JButton("undefined");
+    private JButton btn2 = new JButton("undefined");
+    private JButton btn3 = new JButton("undefined");
+    private JButton btn4 = new JButton("undefined");
+
     public OrconPanel() {
         initComponents();
     }
@@ -92,15 +97,25 @@ public class OrconPanel {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 16,0));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(16,16,16,16));
         buttonPanel.add(loginButton);
         buttonPanel.add(closeButton);
-        layouter.fixSize(buttonPanel, Integer.MAX_VALUE);
         layouter.setConstraints(buttonPanel, 0, 2, GridBagConstraints.REMAINDER, 1);
         orconPanel.add(buttonPanel);
 
+        JPanel macroPanel = new JPanel();
+        macroPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 16,0));
+        macroPanel.setBorder(BorderFactory.createEmptyBorder(16,16,16,16));
+        macroPanel.add(btn1);
+        macroPanel.add(btn2);
+        macroPanel.add(btn3);
+        macroPanel.add(btn4);
+        layouter.setConstraints(macroPanel, 0, 3, GridBagConstraints.REMAINDER, 1);
+        orconPanel.add(macroPanel);
+
         messageLabel = new JLabel("ORCA Controller");
         messageLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 28));
-        layouter.setConstraints(messageLabel, 0,3, GridBagConstraints.REMAINDER, GridBagConstraints.REMAINDER, 1, 1);
+        layouter.setConstraints(messageLabel, 0,4, GridBagConstraints.REMAINDER, GridBagConstraints.REMAINDER, 1, 1);
         orconPanel.add(messageLabel);
     }
 
@@ -151,6 +166,11 @@ public class OrconPanel {
     public JButton getLoginButton() { return loginButton; }
 
     public JButton getCloseButton() { return closeButton; }
+
+    public JButton getBtn1() { return btn1; }
+    public JButton getBtn2() { return btn1; }
+    public JButton getBtn3() { return btn1; }
+    public JButton getBtn4() { return btn1; }
 
     /**
      * GridBagLayout utility.

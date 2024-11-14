@@ -64,8 +64,6 @@ public class Macro {
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200));
             wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-            // こちらの方が確実だが, implicit 200 msec より大分遅い
-            //WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
 
             driver.get(panel.getAddressField().getText());
             WebElement user = driver.findElement(By.id("user"));
@@ -76,7 +74,9 @@ public class Macro {
             login.click();
 
             // (K02)診療行為入力まで進む
-            moveToShinryoKoi();
+            //loginMoveToShinryoKoi();
+            // (M01)業務メニューまで進む
+            loginMoveToGyomu();
 
         } catch (RuntimeException e) {
             e.printStackTrace(System.err);
@@ -85,17 +85,49 @@ public class Macro {
     }
 
     /**
-     * ログイン後, (K02)診療行為入力 まで進む.
+     * ログイン後、(K02)診療行為入力 まで進む.
      */
-    public void moveToShinryoKoi() {
-        // ↓ 確実だが, implicit 200 msec より大分遅い
-        //wait.until(ExpectedConditions.titleContains(マスターメニュー.id));
-        WebElement m00selnum = driver.findElement(By.id(マスターメニュー選択番号.id));
-        m00selnum.sendKeys("01", Keys.ENTER);
-
-        //wait.until(ExpectedConditions.titleContains(業務メニュー.id));
+    public void loginMoveToShinryoKoi() {
+        logger.info("診療行為入力まで進む");
+        loginMoveToGyomu();
         WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
         m01selnum.sendKeys("21", Keys.ENTER);
+    }
+
+    /**
+     * ログイン後、(M01)業務メニュー まで進む.
+     */
+    public void loginMoveToGyomu() {
+        logger.info("業務メニューまで進む");
+        // ↓ 確実だが, implicit 200 msec より大分遅い
+        WebElement m00selnum = driver.findElement(By.id(マスターメニュー選択番号.id));
+        m00selnum.sendKeys("01", Keys.ENTER);
+    }
+
+    /**
+     * 戻るボタンで (M01)業務メニューに戻る
+     */
+    public void backToGyomu() {
+        logger.info("業務メニューに戻る");
+        String title = driver.getTitle();
+        while (!title.contains("M00") && !title.contains("M01")) {
+            WebElement back = findButtonElement("戻る");
+            back.click();
+            wait.until(d -> !d.getTitle().equals(title));
+
+            logger.info("---- " + title);
+            title = driver.getTitle();
+        }
+    }
+
+    /**
+     * 指定した文字のボタンを探す.
+     * @param text text to search
+     * @return button element or null
+     */
+    private WebElement findButtonElement(String text) {
+        List<WebElement> buttons = driver.findElements(By.tagName("button"));
+        return buttons.stream().filter(b -> text.equals(b.getText())).findFirst().orElse(null);
     }
 
     /**

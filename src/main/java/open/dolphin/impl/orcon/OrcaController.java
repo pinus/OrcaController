@@ -57,7 +57,12 @@ public class OrcaController { //extends AbstractMainComponent {
         orconPanel.getLoginButton().addActionListener(e -> macro.login());
         orconPanel.getCloseButton().addActionListener(e -> macro.close());
 
-        //getContext().getFrame().getRootPane().setDefaultButton(orconPanel.getLoginButton());
+       JButton backtoGyomu = orconPanel.getBtn1();
+       backtoGyomu.setText("業務メニューに戻る");
+       backtoGyomu.addActionListener(e -> macro.backToGyomu());
+
+
+
     }
 
 //    @Override
@@ -97,7 +102,7 @@ public class OrcaController { //extends AbstractMainComponent {
         int x = prefs.getInt("JFLAME_X", 100);
         int y = prefs.getInt("JFLAME_Y", 100);
         int w = prefs.getInt("JFLAME_W", 720);
-        int h = prefs.getInt("JFLAME_H", 240);
+        int h = prefs.getInt("JFLAME_H", 340);
         System.out.println("prefs loaded");
 
         JFrame frame = new JFrame();
@@ -139,7 +144,10 @@ public class OrcaController { //extends AbstractMainComponent {
         });
 
         Desktop desktop = Desktop.getDesktop();
-        desktop.setQuitHandler((e, response) -> frame.dispose());
+        desktop.setQuitHandler((e, response) -> {
+            orcon.macro.close();
+            frame.dispose();
+        });
 
         frame.setVisible(true);
     }

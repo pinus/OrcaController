@@ -1,5 +1,6 @@
 package open.dolphin.impl.orcon;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.output.TeeOutputStream;
@@ -28,7 +29,10 @@ public class OrcaController { //extends AbstractMainComponent {
 
     public OrcaController() {
         //setName(NAME);
+        WebDriverManager.chromedriver().setup();
+        String driverPath = System.getProperty("webdriver.chrome.driver");
         logger = LoggerFactory.getLogger(OrcaController.class);
+        logger.info("chrome driver path = " + driverPath);
     }
 
     //@Override

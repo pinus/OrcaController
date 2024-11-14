@@ -104,6 +104,10 @@ public class OrconPanel {
         orconPanel.add(messageLabel);
     }
 
+    /**
+     * ウインドウ状態に応じてメッセージを変える.
+     * @param active window active or not
+     */
     public void setActive(boolean active) {
         messageLabel.setText("ORCA Controller " + (active? "Listening" : "Idling"));
         messageLabel.setForeground(active? Color.BLACK : Color.LIGHT_GRAY);

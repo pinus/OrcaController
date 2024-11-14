@@ -72,7 +72,7 @@ public class OrconPanel {
         layouter.setConstraints(glue, 5, 1, GridBagConstraints.REMAINDER, 1);
         orconPanel.add(glue);
 
-        loginButton = new JButton("ORCA ログイン") {
+        loginButton = new JButton("ORCA 起動") {
             // デフォルトボタンの文字を白くする
             private final boolean isMac = System.getProperty("os.name").startsWith("Mac");
             private Window parent;

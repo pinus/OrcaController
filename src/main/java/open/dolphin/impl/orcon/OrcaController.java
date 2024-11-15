@@ -54,25 +54,17 @@ public class OrcaController { //extends AbstractMainComponent {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyDisptcher);
 
         orconPanel.getLoginButton().addActionListener(e -> {
-            keyDisptcher.setEnabled(true);
+            keyDisptcher.setMode(OrconKeyDispatcher.Mode.FULL);
             orconMacro.login();
         });
         orconPanel.getCloseButton().addActionListener(e -> {
-            keyDisptcher.setEnabled(false);
+            keyDisptcher.setMode(OrconKeyDispatcher.Mode.DISABLE);
             orconMacro.close();
         });
 
        JButton backtoGyomu = orconPanel.getBtn1();
        backtoGyomu.setText("業務メニューに戻る");
        backtoGyomu.addActionListener(e -> orconMacro.backToGyomu());
-    }
-
-    /**
-     * orcon にキーを送るかどうか.
-     * @param enable set true to send keys to orcon
-     */
-    public void enableOrconKeyProcessor(boolean enable) {
-        keyDisptcher.setEnabled(enable);
     }
 
 //    @Override
@@ -155,7 +147,9 @@ public class OrcaController { //extends AbstractMainComponent {
 
         Desktop desktop = Desktop.getDesktop();
         desktop.setQuitHandler((e, response) -> {
-            orcon.orconMacro.close();
+            if (orcon.orconPanel.getCloseButton().isEnabled()) {
+                orcon.orconMacro.close();
+            }
             frame.dispose();
         });
 

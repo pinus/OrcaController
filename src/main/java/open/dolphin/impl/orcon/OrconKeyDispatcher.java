@@ -13,7 +13,9 @@ import java.awt.event.KeyEvent;
  * @author pns
  */
 public class OrconKeyDispatcher implements KeyEventDispatcher {
-    private boolean enabled = false;
+    public enum Mode { DISABLE, FULL, STEALTH }
+
+    private Mode mode;
     private OrconMacro orconMacro;
     private final Logger logger = LoggerFactory.getLogger(OrconKeyDispatcher.class);
 
@@ -24,10 +26,15 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
 
     public OrconKeyDispatcher(OrconMacro orconMacro) {
         this.orconMacro = orconMacro;
+        mode = Mode.DISABLE;
     }
 
-    public void setEnabled(boolean enable) {
-        this.enabled = enable;
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
+
+    public Mode getMode(){
+        return mode;
     }
 
     /**
@@ -59,11 +66,11 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
         // 特殊キーを selenium Keys に変換
         Keys specialKey = KeyUtils.toSeleniumKey(e.getKeyCode());
         if (specialKey != null) {
-            logger.info("specialKey = " + specialKey);
+            //logger.info("specialKey = " + specialKey);
             chord.append(specialKey);
         } else {
             // 通常キーは getChar で受ける
-            logger.info("normal key = " + e.getKeyChar());
+            //logger.info("normal key = " + e.getKeyChar());
             chord.append(e.getKeyChar());
         }
 //        for (int i=0; i<chord.length(); i++) {
@@ -77,64 +84,80 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
         orconMacro.sendThrough(chord);
     }
 
+    /**
+     * DISABLE: 何も奪わない, FULL: コマンドキーは奪わない
+     * STEALTH: コマンドキー、スペース、矢印キーは奪わない
+     * @param e the KeyEvent to dispatch
+     * @return
+     */
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
-        if (enabled) {
-            setModifierState(e);
-            //
-            // ショートカットキーでマクロを呼ぶ
-            //
-            if (ctrl && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                // 中途終了展開 CTRL + ENTER
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    if (orconMacro.whereAmI().equals("K02")) {
-                        orconMacro.k20ChutoTenkai();
-                    }
-                }
+        setModifierState(e);
 
-            } else if (ctrl && e.getKeyCode() == KeyEvent.VK_K) {
-                // 外来管理加算削除 CTRL + K
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    if (orconMacro.whereAmI().equals("K02")) {
-                        orconMacro.k02GairaiKanriDelete();
-                    }
-                }
-
-            } else if (ctrl && e.getKeyCode() == KeyEvent.VK_B) {
-                // (C02)病名登録へ移動
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    if (orconMacro.whereAmI().equals("K02")) {
-                        orconMacro.k02ToByomeiToroku();
-                    }
-                }
-
-            } else if (ctrl && (e.getKeyCode() == KeyEvent.VK_0 || e.getKeyCode() == KeyEvent.VK_1 || e.getKeyCode() == KeyEvent.VK_2)) {
-                // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    if (orconMacro.whereAmI().equals("K03")) {
-                        orconMacro.k03SelectPrintForms(e.getKeyCode() - KeyEvent.VK_0);
-                    }
-                }
-
-            } else if (ctrl && e.getKeyCode() == KeyEvent.VK_V) {
-                // 患者番号送信
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    switch (orconMacro.whereAmI()) {
-                        case "K02" -> orconMacro.k02SendPtNum();
-                        case "C02" -> orconMacro.c02SendPtNum();
-                    }
-                }
-
-            } else {
-                // ショートカットキー以外は, そのまま流す
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    sendThrough(e);
-                }
+        if (mode == Mode.DISABLE) {
+            return false;
+        } else if (mode == Mode.FULL) {
+            if (meta) { return false; }
+        } else {
+            // stealth
+            if (meta || e.getKeyCode() == KeyEvent.VK_SPACE
+                || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN
+                || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_LEFT) {
+                return false;
             }
-            // block
-            return true;
         }
 
-        return false;
+        //
+        // ショートカットキーでマクロを呼ぶ
+        //
+        if (ctrl && e.getKeyCode() == KeyEvent.VK_ENTER) {
+            // 中途終了展開 CTRL + ENTER
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                if (orconMacro.whereAmI().equals("K02")) {
+                    orconMacro.k20ChutoTenkai();
+                }
+            }
+
+        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_K) {
+            // 外来管理加算削除 CTRL + K
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                if (orconMacro.whereAmI().equals("K02")) {
+                    orconMacro.k02GairaiKanriDelete();
+                }
+            }
+
+        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_B) {
+            // (C02)病名登録へ移動
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                if (orconMacro.whereAmI().equals("K02")) {
+                    orconMacro.k02ToByomeiToroku();
+                }
+            }
+
+        } else if (ctrl && (e.getKeyCode() == KeyEvent.VK_0 || e.getKeyCode() == KeyEvent.VK_1 || e.getKeyCode() == KeyEvent.VK_2)) {
+            // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                if (orconMacro.whereAmI().equals("K03")) {
+                    orconMacro.k03SelectPrintForms(e.getKeyCode() - KeyEvent.VK_0);
+                }
+            }
+
+        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_V) {
+            // 患者番号送信
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                switch (orconMacro.whereAmI()) {
+                    case "K02" -> orconMacro.k02SendPtNum();
+                    case "C02" -> orconMacro.c02SendPtNum();
+                }
+            }
+
+        } else {
+            // ショートカットキー以外は, そのまま流す
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                sendThrough(e);
+            }
+        }
+        // block
+        return true;
     }
 }

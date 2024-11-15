@@ -8,6 +8,10 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+/**
+ * キーを横取りして orca に送るための key dispacher.
+ * @author pns
+ */
 public class OrconKeyDispatcher implements KeyEventDispatcher {
     private boolean enabled = false;
     private OrconMacro orconMacro;
@@ -62,13 +66,13 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
             logger.info("normal key = " + e.getKeyChar());
             chord.append(e.getKeyChar());
         }
-        for (int i=0; i<chord.length(); i++) {
-            int specialKeyCode = KeyUtils.toKeyCode(chord.charAt(i));
-            String keytext = specialKeyCode < 65535?
-                KeyEvent.getKeyText(specialKeyCode) : String.valueOf(chord.charAt(i));
-            logger.info(String.format("chord[%d] keyCode:%d converted:%d keyChar:%s(%d) charInChord:%s(%s)",
-                i, e.getKeyCode(), specialKeyCode, e.getKeyChar(), (int)e.getKeyChar(), chord.charAt(i), keytext));
-        }
+//        for (int i=0; i<chord.length(); i++) {
+//            int specialKeyCode = KeyUtils.toKeyCode(chord.charAt(i));
+//            String keytext = specialKeyCode < 65535?
+//                KeyEvent.getKeyText(specialKeyCode) : String.valueOf(chord.charAt(i));
+//            logger.info(String.format("chord[%d] keyCode:%d converted:%d keyChar:%s(%d) charInChord:%s(%s)",
+//                i, e.getKeyCode(), specialKeyCode, e.getKeyChar(), (int)e.getKeyChar(), chord.charAt(i), keytext));
+//        }
 
         orconMacro.sendThrough(chord);
     }

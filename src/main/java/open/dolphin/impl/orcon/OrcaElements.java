@@ -5,24 +5,24 @@ package open.dolphin.impl.orcon;
  * @author pns
  */
 public enum OrcaElements {
-    マスターメニュー("M00"),
+    マスターメニューキー("M00"),
     マスターメニュー選択番号("M00.fixed1.SELNUM"),
 
-    業務メニュー("M01"),
+    業務メニューキー("M01"),
     業務メニュー選択番号("M01.fixed1.SELNUM"),
 
-    診療行為("K02"),
+    診療行為キー("K02"),
     診療行為患者番号("K02.fixed2.PTNUM"),
     中途表示ボタン("K02.fixed2.B12CS"),
     病名登録ボタン("K02.fixed2.B07S"),
     中途終了選択番号("K10.fixed1.SELNUM"),
 
-    診療行為請求確認("K03"),
+    診療行為請求確認キー("K03"),
     領収書("K03.fixed3.HAKFLGCOMBO.HAKFLG"),
     明細書("K03.fixed3.MEIPRTFLG_COMB.MEIPRTFLG"),
     処方箋("K03.fixed3.SYOHOPRTFLGCOMBO.SYOHOPRTFLG"),
 
-    病名登録タイトル("C02"),
+    病名登録キー("C02"),
     病名登録患者番号("C02.fixed6.PTNUM"),
 
     エラー閉じるボタン("KERR.fixed1.B01")

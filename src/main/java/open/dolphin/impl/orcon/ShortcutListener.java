@@ -84,23 +84,34 @@ public class ShortcutListener implements KeyListener {
         //
         if (ctrl && e.getKeyCode() == KeyEvent.VK_ENTER) {
             // 中途終了展開 CTRL + ENTER
-            macro.chutoTenkai();
+            if (macro.whereAmI().equals("K02")) {
+                macro.k20ChutoTenkai();
+            }
 
         } else if (ctrl && e.getKeyCode() == KeyEvent.VK_K) {
             // 外来管理加算削除 CTRL + K
-            macro.gairaiKanriDelete();
+            if (macro.whereAmI().equals("K02")) {
+                macro.k02GairaiKanriDelete();
+            }
 
         } else if (ctrl && e.getKeyCode() == KeyEvent.VK_B) {
             // (C02)病名登録へ移動
-            macro.byomeiToroku();
+            if (macro.whereAmI().equals("K02")) {
+            macro.k02ToByomeiToroku();
+            }
 
         } else if (ctrl && (e.getKeyCode() == KeyEvent.VK_0 || e.getKeyCode() == KeyEvent.VK_1 || e.getKeyCode() == KeyEvent.VK_2)) {
             // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
-            macro.printForms(e.getKeyCode() - KeyEvent.VK_0);
+            if (macro.whereAmI().equals("K03")) {
+                macro.k03SelectPrintForms(e.getKeyCode() - KeyEvent.VK_0);
+            }
 
         } else if (ctrl && e.getKeyCode() == KeyEvent.VK_V) {
             // 患者番号送信
-            macro.sendPtNum();
+            switch (macro.whereAmI()) {
+                case "K02" -> macro.k02SendPtNum();
+                case "C02" -> macro.c02SendPtNum();
+            }
 
         } else {
             // ショートカットキー以外は, そのまま流す

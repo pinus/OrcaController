@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -30,20 +31,12 @@ public class Macro {
     private final Logger logger;
 
     // 患者番号
-    private String ptnum = "";
+    private String ptnum = "000001";
 
     public Macro(OrconPanel orconPanel, OrconProperties orconProperties) {
         panel = orconPanel;
         props = orconProperties;
         logger = LoggerFactory.getLogger(Macro.class);
-    }
-
-    /**
-     * 送信する患者番号をセットする.
-     * @param ptnum patient number
-     */
-    public void setPatientNumber(String ptnum) {
-        this.ptnum = ptnum;
     }
 
     /**
@@ -73,8 +66,6 @@ public class Macro {
             pass.sendKeys(new String(panel.getPasswordField().getPassword()));
             login.click();
 
-            // (K02)診療行為入力まで進む
-            //loginMoveToShinryoKoi();
             // (M01)業務メニューまで進む
             loginMoveToGyomu();
 
@@ -85,55 +76,56 @@ public class Macro {
     }
 
     /**
-     * ログイン後、(K02)診療行為入力 まで進む.
-     */
-    public void loginMoveToShinryoKoi() {
-        logger.info("診療行為入力まで進む");
-        loginMoveToGyomu();
-        WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
-        m01selnum.sendKeys("21", Keys.ENTER);
-    }
-
-    /**
-     * ログイン後、(M01)業務メニュー まで進む.
+     * from (M00)マスターメニュー to (M01)業務メニュー.
      */
     public void loginMoveToGyomu() {
         logger.info("業務メニューまで進む");
-        // ↓ 確実だが, implicit 200 msec より大分遅い
         WebElement m00selnum = driver.findElement(By.id(マスターメニュー選択番号.id));
         m00selnum.sendKeys("01", Keys.ENTER);
     }
 
     /**
-     * 戻るボタンで (M01)業務メニューに戻る
+     * from ANYWHERE to (M01)業務メニュー.
      */
     public void backToGyomu() {
         logger.info("業務メニューに戻る");
-        String title = driver.getTitle();
-        while (!title.contains("M00") && !title.contains("M01")) {
+
+        PageUpdated pageUpdated = new PageUpdated();
+        String presentPageTitle = driver.getTitle();
+
+        while (!presentPageTitle.contains(業務メニューキー.id)) {
             WebElement back = findButtonElement("戻る");
             back.click();
-            wait.until(d -> !d.getTitle().equals(title));
-
-            logger.info("---- " + title);
-            title = driver.getTitle();
+            pageUpdated.setOldWhereAmI(presentPageTitle);
+            wait.until(pageUpdated);
+            presentPageTitle = driver.getTitle();
         }
     }
 
     /**
-     * 指定した文字のボタンを探す.
-     * @param text text to search
-     * @return button element or null
+     * from (M01)業務メニュー to (K02)診療行為入力.
      */
-    private WebElement findButtonElement(String text) {
-        List<WebElement> buttons = driver.findElements(By.tagName("button"));
-        return buttons.stream().filter(b -> text.equals(b.getText())).findFirst().orElse(null);
+    public void m01ToShinryoKoi() {
+        logger.info("診療行為入力まで進む");
+        WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
+        m01selnum.sendKeys("21", Keys.ENTER);
     }
 
     /**
-     * (K02)診療行為入力: 中途終了展開.
+     * from (K02)診療行為入力 to (C02)病名登録.
      */
-    public void chutoTenkai() {
+    public void k02ToByomeiToroku() {
+        logger.info("病名登録へ移動");
+        StringBuilder sb = new StringBuilder();
+        sb.append(Keys.SHIFT);
+        sb.append(Keys.F7);
+        sendThrough(sb);
+    }
+
+    /**
+     * at (K02)診療行為入力 do 中途終了展開.
+     */
+    public void k20ChutoTenkai() {
         logger.info("中途終了展開");
         try {
             WebElement chutoButton = driver.findElement(By.id(中途表示ボタン.id));
@@ -152,9 +144,9 @@ public class Macro {
     }
 
     /**
-     * (K02)診療行為入力: 外来管理加算削除
+     * at (K02)診療行為入力 do 外来管理加算削除.
      */
-    public void gairaiKanriDelete() {
+    public void k02GairaiKanriDelete() {
         logger.info("外来管理加算削除");
         // list of "入力コード" column
         List<WebElement> elements = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div[6]/div/div[19]/table/tbody/tr/td[2]/input"));
@@ -173,21 +165,10 @@ public class Macro {
     }
 
     /**
-     * (K02)診療行為入力: 病名登録へ移動
-     */
-    public void byomeiToroku() {
-        logger.info("病名登録へ移動");
-        StringBuilder sb = new StringBuilder();
-        sb.append(Keys.SHIFT);
-        sb.append(Keys.F7);
-        sendThrough(sb);
-    }
-
-    /**
-     * (K03)診療行為入力-請求確認でのコンボボックス. 0 発行なし, 1 発行あり
+     * at (K03)診療行為入力 do 請求確認でのコンボボックス. 0 発行なし, 1 発行あり
      * @param n 0:全て印刷しない, 1: 領収書のみ印刷, 2: 処方箋のみ印刷, 3:両方印刷
      */
-    public void printForms(int n) {
+    public void k03SelectPrintForms(int n) {
         logger.info("印刷帳票選択");
         WebElement ryosyusyoElement = driver.findElement(By.id(領収書.id));
         WebElement meisaisyoElement = driver.findElement(By.id(明細書.id));
@@ -209,20 +190,28 @@ public class Macro {
     }
 
     /**
-     * (K02) K02.fixed2.PTNUM, (C02)病名登録 C02.fixed6.PTNUM
+     * at (K02)診療行為入力 do 患者番号送信.
      */
-    public void sendPtNum() {
+    public void k02SendPtNum() {
         logger.info("患者番号送信 " + ptnum);
+        sendPtNumTo(診療行為患者番号.id);
+    }
+
+    /**
+     * at (C02)病名登録 do 患者番号送信.
+     */
+    public void c02SendPtNum() {
+        logger.info("患者番号送信 " + ptnum);
+        sendPtNumTo(病名登録患者番号.id);
+    }
+
+    /**
+     * elementId のフィールドに患者番号送信.
+     */
+    private void sendPtNumTo(String elementId) {
         if (!ptnum.isEmpty()) {
-            WebElement test = driver.findElement(By.id(診療行為患者番号.id));
-            if (test.isDisplayed()) {
-                test.sendKeys(ptnum);
-                return;
-            }
-            test = driver.findElement(By.id(病名登録患者番号.id));
-            if (test.isDisplayed()) {
-                test.sendKeys(ptnum);
-            }
+            WebElement test = driver.findElement(By.id(elementId));
+            if (test.isDisplayed()) { test.sendKeys(ptnum); }
         }
     }
 
@@ -261,5 +250,39 @@ public class Macro {
     public void quit() {
         driver.quit();
         panel.getLoginButton().setEnabled(true);
+    }
+
+    /**
+     * 指定した文字のボタンを探す.
+     * @param text text to search
+     * @return button element or null
+     */
+    private WebElement findButtonElement(String text) {
+        List<WebElement> buttons = driver.findElements(By.tagName("button"));
+        return buttons.stream().filter(b -> text.equals(b.getText())).findFirst().orElse(null);
+    }
+
+    /**
+     * ページのキー ("M01" 等) を返す.
+     * @return key of the present page
+     */
+    public String whereAmI() {
+        return driver.getTitle().substring(1,4);
+    }
+
+    /**
+     * ページ更新を待つ ExpectedCondition.
+     */
+    private class PageUpdated implements ExpectedCondition<Boolean> {
+        private String oldPageTitle;
+
+        public void setOldWhereAmI(String oldPageTitle) {
+            this.oldPageTitle = oldPageTitle;
+        }
+
+        @Override
+        public Boolean apply(WebDriver input) {
+            return !input.getTitle().equals(oldPageTitle);
+        }
     }
 }

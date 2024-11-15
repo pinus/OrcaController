@@ -133,14 +133,18 @@ public class OrconPanel {
      * @param login ログイン中かどうか
      */
     public void setLoginState(boolean login) {
-            loginButton.setEnabled(!login);
-            closeButton.setEnabled(login);
-            addressField.setEnabled(!login);
-            addressField.setFocusable(!login);
-            userField.setEnabled(!login);
-            userField.setFocusable(!login);
-            passwordField.setEnabled(!login);
-            passwordField.setFocusable(!login);
+        loginButton.setEnabled(!login);
+        closeButton.setEnabled(login);
+        addressField.setEnabled(!login);
+        addressField.setFocusable(!login);
+        userField.setEnabled(!login);
+        userField.setFocusable(!login);
+        passwordField.setEnabled(!login);
+        passwordField.setFocusable(!login);
+        btn1.setEnabled(login);
+        btn2.setEnabled(login);
+        btn3.setEnabled(login);
+        btn4.setEnabled(login);
     }
 
     public JPanel getPanel() { return orconPanel; }

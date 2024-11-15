@@ -24,7 +24,8 @@ public class OrcaController { //extends AbstractMainComponent {
     private static final String NAME = "オルコン";
     private OrconPanel orconPanel;
     private OrconProperties orconProps;
-    private Macro macro;
+    private OrconMacro orconMacro;
+    private OrconKeyDispatcher keyDisptcher;
     private final Logger logger;
 
     public OrcaController() {
@@ -47,22 +48,31 @@ public class OrcaController { //extends AbstractMainComponent {
 
         orconProps = new OrconProperties(orconPanel);
         orconProps.modelToView();
-        macro = new Macro(orconPanel, orconProps);
+        orconMacro = new OrconMacro(orconPanel, orconProps);
 
-        // Listen KeyEvent on the close button,
-        // which is the only component enabled after orca login
-        ShortcutListener shortcutListener = new ShortcutListener(macro);
-        orconPanel.getCloseButton().addKeyListener(shortcutListener);
-        orconPanel.getCloseButton().setFocusTraversalKeysEnabled(false); // tab を取られないように
-        orconPanel.getLoginButton().addActionListener(e -> macro.login());
-        orconPanel.getCloseButton().addActionListener(e -> macro.close());
+        keyDisptcher = new OrconKeyDispatcher(orconMacro);
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyDisptcher);
+
+        orconPanel.getLoginButton().addActionListener(e -> {
+            keyDisptcher.setEnabled(true);
+            orconMacro.login();
+        });
+        orconPanel.getCloseButton().addActionListener(e -> {
+            keyDisptcher.setEnabled(false);
+            orconMacro.close();
+        });
 
        JButton backtoGyomu = orconPanel.getBtn1();
        backtoGyomu.setText("業務メニューに戻る");
-       backtoGyomu.addActionListener(e -> macro.backToGyomu());
+       backtoGyomu.addActionListener(e -> orconMacro.backToGyomu());
+    }
 
-
-
+    /**
+     * orcon にキーを送るかどうか.
+     * @param enable set true to send keys to orcon
+     */
+    public void enableOrconKeyProcessor(boolean enable) {
+        keyDisptcher.setEnabled(enable);
     }
 
 //    @Override
@@ -145,7 +155,7 @@ public class OrcaController { //extends AbstractMainComponent {
 
         Desktop desktop = Desktop.getDesktop();
         desktop.setQuitHandler((e, response) -> {
-            orcon.macro.close();
+            orcon.orconMacro.close();
             frame.dispose();
         });
 

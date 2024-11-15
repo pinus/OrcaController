@@ -23,7 +23,7 @@ import static open.dolphin.impl.orcon.OrcaElements.*;
  * マクロ.
  * @author pns
  */
-public class Macro {
+public class OrconMacro {
     private WebDriver driver;
     private WebDriverWait wait;
     private final OrconPanel panel;
@@ -33,10 +33,10 @@ public class Macro {
     // 患者番号
     private String ptnum = "000001";
 
-    public Macro(OrconPanel orconPanel, OrconProperties orconProperties) {
+    public OrconMacro(OrconPanel orconPanel, OrconProperties orconProperties) {
         panel = orconPanel;
         props = orconProperties;
-        logger = LoggerFactory.getLogger(Macro.class);
+        logger = LoggerFactory.getLogger(OrconMacro.class);
     }
 
     /**

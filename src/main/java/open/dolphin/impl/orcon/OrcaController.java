@@ -36,6 +36,10 @@ public class OrcaController { //extends AbstractMainComponent {
         logger.info("chrome driver path = " + driverPath);
     }
 
+    public OrconPanel getOrconPanel() { return orconPanel; }
+
+    public OrconProperties getOrconProps() { return orconProps; }
+
     //@Override
     public JPanel getUI() {
         return orconPanel.getPanel();
@@ -48,7 +52,7 @@ public class OrcaController { //extends AbstractMainComponent {
 
         orconProps = new OrconProperties(orconPanel);
         orconProps.modelToView();
-        orconMacro = new OrconMacro(orconPanel, orconProps);
+        orconMacro = new OrconMacro(this);
 
         keyDisptcher = new OrconKeyDispatcher(orconMacro);
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyDisptcher);

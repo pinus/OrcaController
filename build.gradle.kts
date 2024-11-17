@@ -49,6 +49,23 @@ tasks {
             "make", "mac-app"))
 
     }
+    val conveyorSite = register<Exec>("conveyor-site") {
+        group = "distribution"
+        description = "make site"
+        dependsOn.add(shadowJar)
+        dependsOn.add(deleteConveyorOutput)
+        workingDir(projectDir)
+        val jarName = shadowJar.get().archiveFileName.get()
+        val projectVersion = project.property("version")
+        val javaVersion = project.property("java.version")
+        commandLine = (listOf(
+            conveyorCommand,
+            "-Kjar.name=${jarName}",
+            "-Kproject.version=${projectVersion}",
+            "-Kbuild.date=${buildDate}",
+            "-Kjava.version=${javaVersion}",
+            "make", "mac-app"))
+    }
     register<Exec>("tar") {
         group = "distribution"
         description = "make tar"

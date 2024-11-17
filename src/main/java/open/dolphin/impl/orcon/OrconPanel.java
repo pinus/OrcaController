@@ -172,9 +172,9 @@ public class OrconPanel {
     public JButton getCloseButton() { return closeButton; }
 
     public JButton getBtn1() { return btn1; }
-    public JButton getBtn2() { return btn1; }
-    public JButton getBtn3() { return btn1; }
-    public JButton getBtn4() { return btn1; }
+    public JButton getBtn2() { return btn2; }
+    public JButton getBtn3() { return btn3; }
+    public JButton getBtn4() { return btn4; }
 
     /**
      * GridBagLayout utility.

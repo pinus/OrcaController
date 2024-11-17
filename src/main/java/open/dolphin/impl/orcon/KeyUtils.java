@@ -14,7 +14,7 @@ public class KeyUtils {
     /**
      * KeyCode -> Selenium Keys のマップ
      */
-    public static Map<Integer, Keys> MAP = new HashMap<Integer, Keys>();
+    public static Map<Integer, Keys> MAP = new HashMap<>();
     static {
         MAP.put(KeyEvent.VK_SHIFT, Keys.SHIFT);
         MAP.put(KeyEvent.VK_CONTROL, Keys.CONTROL);
@@ -69,7 +69,7 @@ public class KeyUtils {
         MAP.put(KeyEvent.VK_F10, Keys.F10);
         MAP.put(KeyEvent.VK_F11, Keys.F11);
         MAP.put(KeyEvent.VK_F12, Keys.F12);
-    };
+    }
 
     /**
      * 特殊キーを selenium Keys に変換.

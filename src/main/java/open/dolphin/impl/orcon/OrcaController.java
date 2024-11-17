@@ -66,9 +66,17 @@ public class OrcaController { //extends AbstractMainComponent {
             orconMacro.close();
         });
 
-       JButton backtoGyomu = orconPanel.getBtn1();
-       backtoGyomu.setText("業務メニューに戻る");
-       backtoGyomu.addActionListener(e -> orconMacro.backToGyomu());
+        JButton backtoGyomu = orconPanel.getBtn1();
+        backtoGyomu.setText("業務メニューに戻る");
+        backtoGyomu.addActionListener(e -> orconMacro.backToGyomu());
+
+        JButton kanjasu = orconPanel.getBtn2();
+        kanjasu.setText("患者数一覧表");
+        kanjasu.addActionListener(e -> orconMacro.m01ToKanjasu());
+
+        JButton nikkei = orconPanel.getBtn3();
+        nikkei.setText("日計表");
+        nikkei.addActionListener(e -> orconMacro.m01ToNikkei());
     }
 
 //    @Override

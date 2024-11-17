@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -55,7 +56,7 @@ public class OrconMacro {
 
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200));
-            wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
             driver.get(panel.getAddressField().getText());
             WebElement user = driver.findElement(By.id("user"));
@@ -68,7 +69,7 @@ public class OrconMacro {
             // (M01)業務メニューまで進む
             loginMoveToGyomu();
             // (K02)診療行為入力 まで進む
-            m01ToShinryoKoi();
+            //m01ToShinryoKoi();
 
         } catch (RuntimeException e) {
             e.printStackTrace(System.err);
@@ -101,6 +102,44 @@ public class OrconMacro {
             wait.until(pageUpdated);
             presentPageTitle = driver.getTitle();
         }
+    }
+
+    /**
+     * (G01)月次統計 患者数一覧表プレビューを開く.
+     */
+    public void m01ToKanjasu() {
+        logger.info("患者数一覧表");
+        WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
+        m01selnum.sendKeys("52", Keys.ENTER);
+        WebElement g01 = driver.findElement(By.id(患者数一覧表.id));
+        Actions action = new Actions(driver);
+        action.moveToElement(g01).click().build().perform(); // g01.click() cause ElementClickInterceptedException
+        sendThrough(Keys.F12);
+        sendThrough(Keys.F10);
+        WebElement preview = driver.findElement(By.id(プレビューG99.id));
+        wait.until(ExpectedConditions.elementToBeClickable(preview));
+        preview.click();
+    }
+
+    /**
+     * (L01)日次統計 日計表を開く.
+     */
+    public void m01ToNikkei() {
+        logger.info("日計表");
+        WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
+        m01selnum.sendKeys("51", Keys.ENTER);
+        WebElement l01 = driver.findElement(By.id(日計表.id));
+        Actions action = new Actions(driver);
+        action.moveToElement(l01).click().build().perform(); // g01.click() cause ElementClickInterceptedException
+        sendThrough(Keys.F12);
+        sendThrough(Keys.F10);
+        WebElement preview = driver.findElement(By.id(プレビューL99.id));
+        wait.until(ExpectedConditions.elementToBeClickable(preview));
+        preview.click();
+        sendThrough(Keys.F8);
+        sendThrough(Keys.F8);
+        sendThrough(Keys.F8);
+        sendThrough(Keys.F8);
     }
 
     /**

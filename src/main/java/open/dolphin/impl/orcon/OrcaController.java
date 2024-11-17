@@ -1,5 +1,6 @@
 package open.dolphin.impl.orcon;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,11 @@ public class OrcaController { //extends AbstractMainComponent {
 
     public OrcaController() {
         //setName(NAME);
+        FlatLightLaf.setup();
+        UIManager.put( "Component.focusWidth", 2);
+        UIManager.put( "TextComponent.arc", 8 );
+        UIManager.put( "Button.arc", 8 );
+
         WebDriverManager.chromedriver().setup();
         String driverPath = System.getProperty("webdriver.chrome.driver");
         logger = LoggerFactory.getLogger(OrcaController.class);
@@ -128,16 +134,6 @@ public class OrcaController { //extends AbstractMainComponent {
 
         frame.addWindowListener(new WindowListener() {
             @Override
-            public void windowClosed(WindowEvent e) {
-                prefs.putInt("JFLAME_X", frame.getBounds().x);
-                prefs.putInt("JFLAME_Y", frame.getBounds().y);
-                prefs.putInt("JFLAME_W", frame.getBounds().width);
-                prefs.putInt("JFLAME_H", frame.getBounds().height);
-                System.out.println("prefs saved");
-                System.exit(0);
-            }
-
-            @Override
             public void windowActivated(WindowEvent e) {
                 orcon.orconPanel.setActive(orcon.orconPanel.getCloseButton().isEnabled());
             }
@@ -148,6 +144,8 @@ public class OrcaController { //extends AbstractMainComponent {
             }
 
             @Override
+            public void windowClosed(WindowEvent e) {}
+            @Override
             public void windowIconified(WindowEvent e) {}
             @Override
             public void windowDeiconified(WindowEvent e) {}
@@ -157,14 +155,16 @@ public class OrcaController { //extends AbstractMainComponent {
             public void windowClosing(WindowEvent e) {}
         });
 
-        Desktop desktop = Desktop.getDesktop();
-        desktop.setQuitHandler((e, response) -> {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (orcon.orconPanel.getCloseButton().isEnabled()) {
                 orcon.orconMacro.close();
             }
-            frame.dispose();
-        });
-
+            prefs.putInt("JFLAME_X", frame.getBounds().x);
+            prefs.putInt("JFLAME_Y", frame.getBounds().y);
+            prefs.putInt("JFLAME_W", frame.getBounds().width);
+            prefs.putInt("JFLAME_H", frame.getBounds().height);
+            System.out.println("prefs saved");
+        }));
         frame.setVisible(true);
     }
 }

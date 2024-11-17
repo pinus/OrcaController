@@ -84,4 +84,5 @@ dependencies {
     implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
     implementation("ch.qos.logback:logback-classic:1.4.14")
     implementation("commons-io:commons-io:2.16.1")
+    implementation("com.formdev:flatlaf:3.5")
 }

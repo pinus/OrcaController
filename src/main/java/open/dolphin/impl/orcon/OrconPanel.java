@@ -77,21 +77,7 @@ public class OrconPanel {
         layouter.setConstraints(glue, 5, 1, GridBagConstraints.REMAINDER, 1);
         orconPanel.add(glue);
 
-        loginButton = new JButton("ORCA 起動") {
-            // デフォルトボタンの文字を白くする
-            private final boolean isMac = System.getProperty("os.name").startsWith("Mac");
-            private Window parent;
-            public void paint(Graphics g) {
-                if (isMac) {
-                    parent = SwingUtilities.getWindowAncestor(this);
-                    if (model.isEnabled()) {
-                        setForeground(Objects.nonNull(parent) && parent.isActive() && isDefaultButton() && !model.isPressed()?
-                            Color.WHITE : Color.BLACK);
-                    }
-                }
-                super.paint(g);
-            }
-        };
+        loginButton = new JButton("ORCA 起動");
         closeButton = new JButton("ORCA 終了");
         closeButton.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
 

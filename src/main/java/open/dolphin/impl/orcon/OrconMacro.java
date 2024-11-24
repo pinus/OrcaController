@@ -133,6 +133,7 @@ public class OrconMacro {
         Actions action = new Actions(driver);
         action.moveToElement(l01).click().build().perform(); // g01.click() cause ElementClickInterceptedException
         sendThrough(Keys.F12);
+        wait.until(ExpectedConditions.elementToBeClickable(By.id(プレビューLID2.id)));
         sendThrough(Keys.F10);
         WebElement preview = driver.findElement(By.id(プレビューL99.id));
         wait.until(ExpectedConditions.elementToBeClickable(preview));

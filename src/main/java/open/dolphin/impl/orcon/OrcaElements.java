@@ -31,8 +31,11 @@ public enum OrcaElements {
     月次統計キー("G01"),
     患者数一覧表("G01.fixed.CHK02"),
 
-    確認画面キー("GID2"),
+    確認画面キーGID2("GID2"),
     プレビューGID2("GID2.fixed1.B10"),
+
+    確認画面キーLID2("LID2"),
+    プレビューLID2("LID2.fixed1.B10"),
 
     処理結果キーG99("G99"),
     プレビューG99("G99.fixed6.B12"),

@@ -49,7 +49,7 @@ tasks {
             "make", "mac-app"))
 
     }
-    val conveyorSite = register<Exec>("conveyor-site") {
+    register<Exec>("conveyor-site") {
         group = "distribution"
         description = "make site"
         dependsOn.add(shadowJar)
@@ -64,7 +64,7 @@ tasks {
             "-Kproject.version=${projectVersion}",
             "-Kbuild.date=${buildDate}",
             "-Kjava.version=${javaVersion}",
-            "make", "mac-app"))
+            "make", "copied-site"))
     }
     register<Exec>("tar") {
         group = "distribution"

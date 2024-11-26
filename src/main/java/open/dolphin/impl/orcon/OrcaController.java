@@ -31,15 +31,16 @@ public class OrcaController { //extends AbstractMainComponent {
 
     public OrcaController() {
         //setName(NAME);
+        logger = LoggerFactory.getLogger(OrcaController.class);
         FlatLightLaf.setup();
         UIManager.put( "Component.focusWidth", 2);
         UIManager.put( "TextComponent.arc", 8 );
         UIManager.put( "Button.arc", 8 );
-
-        WebDriverManager.chromedriver().setup();
-        String driverPath = System.getProperty("webdriver.chrome.driver");
-        logger = LoggerFactory.getLogger(OrcaController.class);
-        logger.info("chrome driver path = " + driverPath);
+        Thread.ofVirtual().start(() -> {
+            WebDriverManager.chromedriver().setup();
+            String driverPath = System.getProperty("webdriver.chrome.driver");
+            logger.info("chrome driver path = " + driverPath);
+        });
     }
 
     public OrconPanel getOrconPanel() { return orconPanel; }

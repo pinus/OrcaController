@@ -23,36 +23,42 @@ import java.util.prefs.Preferences;
  */
 public class OrcaController { //extends AbstractMainComponent {
     private static final String NAME = "オルコン";
+    public enum Mode { DISABLE, FULL, STEALTH }
+
+    private Mode mode;
     private OrconPanel orconPanel;
     private OrconProperties orconProps;
     private OrconMacro orconMacro;
-    private OrconKeyDispatcher keyDisptcher;
+    private OrconKeyDispatcher keyDispatcher;
     private final Logger logger;
 
     public OrcaController() {
-        //setName(NAME);
         logger = LoggerFactory.getLogger(OrcaController.class);
         FlatLightLaf.setup();
         UIManager.put( "Component.focusWidth", 2);
         UIManager.put( "TextComponent.arc", 8 );
         UIManager.put( "Button.arc", 8 );
         Thread.ofVirtual().start(() -> {
+            logger.info("Setting up chrome driver...");
             WebDriverManager.chromedriver().setup();
-            String driverPath = System.getProperty("webdriver.chrome.driver");
-            logger.info("chrome driver path = " + driverPath);
+            logger.info("Chrome driver setting up done");
         });
+    }
+
+    public Mode getMode() {
+        return mode;
     }
 
     public OrconPanel getOrconPanel() { return orconPanel; }
 
     public OrconProperties getOrconProps() { return orconProps; }
 
-    //@Override
+    public OrconMacro getOrconMacro() { return orconMacro; }
+
     public JPanel getUI() {
         return orconPanel.getPanel();
     }
 
-    //@Override
     public void start() {
         orconPanel = new OrconPanel();
         orconPanel.setLoginState(false);
@@ -61,16 +67,17 @@ public class OrcaController { //extends AbstractMainComponent {
         orconProps.modelToView();
         orconMacro = new OrconMacro(this);
 
-        keyDisptcher = new OrconKeyDispatcher(orconMacro);
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyDisptcher);
-
+        // key dispatcher
+        keyDispatcher = new OrconKeyDispatcher(this);
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyDispatcher);
+        // login したら　enables する
         orconPanel.getLoginButton().addActionListener(e -> {
-            keyDisptcher.setMode(OrconKeyDispatcher.Mode.FULL);
             orconMacro.login();
+            mode = Mode.FULL;
         });
         orconPanel.getCloseButton().addActionListener(e -> {
-            keyDisptcher.setMode(OrconKeyDispatcher.Mode.DISABLE);
             orconMacro.close();
+            mode = Mode.DISABLE;
         });
 
         JButton backtoGyomu = orconPanel.getBtn1();

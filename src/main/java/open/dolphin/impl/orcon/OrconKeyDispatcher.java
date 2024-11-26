@@ -6,16 +6,15 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.stream.Stream;
 
 /**
- * キーを横取りして orca に送るための key dispacher.
+ * キーを横取りして orca に送るための key dispatcher.
  * @author pns
  */
 public class OrconKeyDispatcher implements KeyEventDispatcher {
-    public enum Mode { DISABLE, FULL, STEALTH }
-
-    private Mode mode;
-    private OrconMacro orconMacro;
+    private final OrcaController context;
+    private final OrconMacro orconMacro;
     private final Logger logger = LoggerFactory.getLogger(OrconKeyDispatcher.class);
 
     private boolean shift;
@@ -23,17 +22,9 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
     private boolean alt;
     private boolean meta;
 
-    public OrconKeyDispatcher(OrconMacro orconMacro) {
-        this.orconMacro = orconMacro;
-        mode = Mode.DISABLE;
-    }
-
-    public void setMode(Mode mode) {
-        this.mode = mode;
-    }
-
-    public Mode getMode(){
-        return mode;
+    public OrconKeyDispatcher(OrcaController context) {
+        this.context = context;
+        this.orconMacro = context.getOrconMacro();
     }
 
     /**
@@ -45,6 +36,25 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
         ctrl = e.isControlDown();
         alt = e.isAltDown();
         meta = e.isMetaDown();
+    }
+
+    /**
+     * key code が chord 文字列と一致しているかどうか.
+     * @param code key code
+     * @param chord string like "shift ctrl ENTER"
+     * @return whether key code equals chord string
+     */
+    private boolean is(int code, String chord) {
+        String[] token = chord.split("\\s");
+        int keyValue = KeyUtils.getVKValue(token[token.length-1]);
+        // modifier が指定されていない場合は, modifier は考慮しない
+        if (token.length == 1) { return code == keyValue; }
+        // modifier が指定されている場合
+        boolean s = chord.contains("shift");
+        boolean c = chord.contains("ctrl");
+        boolean a = chord.contains("alt");
+        boolean m = chord.contains("meta");
+        return (code == keyValue) && (!s ^ shift) && (!c ^ ctrl) && (!a ^ alt) && (!m ^ meta);
     }
 
     /**
@@ -84,75 +94,116 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
     }
 
     /**
-     * DISABLE: 何も奪わない, FULL: コマンドキーは奪わない
-     * STEALTH: コマンドキー、スペース、矢印キーは奪わない
+     * DISABLE: 全て dolphin へ送る, FULL: コマンドキーだけ dolphin へ送る
+     * STEALTH: 指定したものだけ dolphin へ送る
      * @param e the KeyEvent to dispatch
-     * @return
+     * @return true to block
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         setModifierState(e);
+        int keyCode = e.getKeyCode();
 
-        if (mode == Mode.DISABLE) {
+        // 横取りしないキーを false で返す
+        if (context.getMode() == OrcaController.Mode.DISABLE) {
+            // 横取りしない
             return false;
-        } else if (mode == Mode.FULL) {
+
+        } else if (context.getMode() == OrcaController.Mode.FULL) {
+            // コマンドキーを横取りしない
             if (meta) { return false; }
-        } else {
-            // stealth
-            if (meta || e.getKeyCode() == KeyEvent.VK_SPACE
-                || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN
-                || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_LEFT) {
+
+        } else { // Mode.STEALTH
+            // ショートカット、ファンクションキーだけ通す
+            if (Stream.of("ctrl shift ENTER", "ctrl K", "ctrl B", "ctrl 0", "ctrl 1", "ctrl 2", "ctrl V", "alt ENTER",
+                    "alt meta A", "alt BACK_SPACE", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12")
+                .noneMatch(chord -> is(keyCode, chord))) {
                 return false;
             }
         }
-
+System.out.println("--- e= " + e);
         //
         // ショートカットキーでマクロを呼ぶ
         //
-        if (ctrl && e.getKeyCode() == KeyEvent.VK_ENTER) {
-            // 中途終了展開 CTRL + ENTER
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+        if (is(keyCode, "shift ctrl ENTER")) {
+            // 中途終了展開 SHIFT + CTRL + ENTER
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
                 if (orconMacro.whereAmI().equals("K02")) {
                     orconMacro.k20ChutoTenkai();
                 }
             }
 
-        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_K) {
+        } else if (is(keyCode, "ctrl K")) {
             // 外来管理加算削除 CTRL + K
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
                 if (orconMacro.whereAmI().equals("K02")) {
                     orconMacro.k02GairaiKanriDelete();
                 }
             }
 
-        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_B) {
+        } else if (is(keyCode, "ctrl B")) {
             // (C02)病名登録へ移動
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
                 if (orconMacro.whereAmI().equals("K02")) {
                     orconMacro.k02ToByomeiToroku();
                 }
             }
-
-        } else if (ctrl && (e.getKeyCode() == KeyEvent.VK_0 || e.getKeyCode() == KeyEvent.VK_1 || e.getKeyCode() == KeyEvent.VK_2)) {
+        } else if (Stream.of("ctrl 0", "ctrl 1", "ctrl 2").anyMatch(chord -> is(keyCode, chord))) {
             // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
                 if (orconMacro.whereAmI().equals("K03")) {
                     orconMacro.k03SelectPrintForms(e.getKeyCode() - KeyEvent.VK_0);
                 }
             }
 
-        } else if (ctrl && e.getKeyCode() == KeyEvent.VK_V) {
+        } else if (is(keyCode, "ctrl V")) {
             // 患者番号送信
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
                 switch (orconMacro.whereAmI()) {
                     case "K02" -> orconMacro.k02SendPtNum();
                     case "C02" -> orconMacro.c02SendPtNum();
                 }
             }
 
+        } else if (is(keyCode, "alt ENTER")) {
+            // alt + ENTER で orca enter 入力
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                orconMacro.sendThrough(Keys.ENTER);
+            }
+
+        } else if (is(keyCode, "alt meta A")) {
+            // shift + command + A で 全選択
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                orconMacro.sendThrough(Keys.chord(Keys.META, "A"));
+            }
+
+        } else if (is(keyCode, "alt BACK_SPACE")) {
+            // alt + backspace だと KEY_RELEASED しか発生しない?
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                orconMacro.sendThrough(Keys.BACK_SPACE);
+            }
+
+        } else if(is(keyCode, "alt 1")) {
+            // command 1 業務メニューに戻る
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                orconMacro.backToGyomu();
+            }
+
+        } else if(is(keyCode, "alt 2")) {
+            // command 2 患者数一覧表
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                orconMacro.m01ToKanjasu();
+            }
+
+        } else if(is(keyCode, "alt 3")) {
+            // command 3 日計表
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                orconMacro.m01ToNikkei();
+            }
+
         } else {
             // ショートカットキー以外は, そのまま流す
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
                 sendThrough(e);
             }
         }

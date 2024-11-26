@@ -3,6 +3,7 @@ package open.dolphin.impl.orcon;
 import org.openqa.selenium.Keys;
 
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,5 +104,21 @@ public class KeyUtils {
      */
     public static boolean isModifier(int k) {
         return k == KeyEvent.VK_SHIFT || k == KeyEvent.VK_CONTROL || k == KeyEvent.VK_ALT || k == KeyEvent.VK_META;
+    }
+
+    /**
+     * key の文字列から VK_XXX のキーコードを返す.
+     * @param key vk string without VK_ (like A, B, ENTER, ...)
+     * @return keycode or -1 if the VK string is invalid
+     */
+    public static int getVKValue(String key) {
+        String vkString = "VK_" + key;
+        try {
+            Field field = KeyEvent.class.getField(vkString);
+            return field.getInt(null); // The field is static, so pass null as the instance
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            System.err.println("Invalid VK string: " + vkString);
+        }
+        return -1;
     }
 }

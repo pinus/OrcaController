@@ -121,7 +121,7 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
                 return false;
             }
         }
-System.out.println("--- e= " + e);
+
         //
         // ショートカットキーでマクロを呼ぶ
         //

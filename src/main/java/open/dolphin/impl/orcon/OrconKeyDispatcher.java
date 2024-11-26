@@ -148,13 +148,13 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
                     orconMacro.k02ToByomeiToroku();
                 }
             }
-        } else if (Stream.of("ctrl 0", "ctrl 1", "ctrl 2").anyMatch(chord -> is(keyCode, chord))) {
-            // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
-            if (e.getID() == KeyEvent.KEY_RELEASED) {
-                if (orconMacro.whereAmI().equals("K03")) {
-                    orconMacro.k03SelectPrintForms(e.getKeyCode() - KeyEvent.VK_0);
-                }
-            }
+//        } else if (Stream.of("ctrl 0", "ctrl 1", "ctrl 2").anyMatch(chord -> is(keyCode, chord))) {
+//            // (K03)診療行為入力ｰ請求確認で, 領収書/明細書/処方箋を打ち出すかどうか
+//            if (e.getID() == KeyEvent.KEY_RELEASED) {
+//                if (orconMacro.whereAmI().equals("K03")) {
+//                    orconMacro.k03SelectPrintForms(e.getKeyCode() - KeyEvent.VK_0);
+//                }
+//            }
 
         } else if (is(keyCode, "ctrl V")) {
             // 患者番号送信
@@ -183,19 +183,19 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
                 orconMacro.sendThrough(Keys.BACK_SPACE);
             }
 
-        } else if(is(keyCode, "alt 1")) {
+        } else if(is(keyCode, "ctrl 1")) {
             // command 1 業務メニューに戻る
             if (e.getID() == KeyEvent.KEY_RELEASED) {
                 orconMacro.backToGyomu();
             }
 
-        } else if(is(keyCode, "alt 2")) {
+        } else if(is(keyCode, "ctrl 2")) {
             // command 2 患者数一覧表
             if (e.getID() == KeyEvent.KEY_RELEASED) {
                 orconMacro.m01ToKanjasu();
             }
 
-        } else if(is(keyCode, "alt 3")) {
+        } else if(is(keyCode, "ctrl 3")) {
             // command 3 日計表
             if (e.getID() == KeyEvent.KEY_RELEASED) {
                 orconMacro.m01ToNikkei();

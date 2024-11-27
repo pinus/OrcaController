@@ -40,3 +40,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/chrome/extensions/4.6.129_0.crx

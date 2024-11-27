@@ -9,14 +9,17 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static open.dolphin.impl.orcon.OrcaElements.*;
 
@@ -54,8 +57,12 @@ public class OrconMacro {
             args.add(String.format("--window-size=%d,%d", bounds.width, bounds.height));
             option.addArguments(args);
 
+            File extensionsDir = new File(System.getProperty("user.dir") + "/chrome/extensions/");
+            File[] extensions = extensionsDir.listFiles();
+            Stream.of(extensions).forEach(option::addExtensions);
+
             driver = new ChromeDriver(option);
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200));
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
             wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
             driver.get(panel.getAddressField().getText());
@@ -120,6 +127,10 @@ public class OrconMacro {
         WebElement preview = driver.findElement(By.id(プレビューG99.id));
         wait.until(ExpectedConditions.elementToBeClickable(preview));
         preview.click();
+
+        // needs extension PDF Viewer by pdfjs.robwu.nl
+        sendThrough(Keys.F8);
+        setPdfViewerScale("1.25");
     }
 
     /**
@@ -138,10 +149,10 @@ public class OrconMacro {
         WebElement preview = driver.findElement(By.id(プレビューL99.id));
         wait.until(ExpectedConditions.elementToBeClickable(preview));
         preview.click();
+
+        // needs extension PDF Viewer by pdfjs.robwu.nl
         sendThrough(Keys.F8);
-        sendThrough(Keys.F8);
-        sendThrough(Keys.F8);
-        sendThrough(Keys.F8);
+        setPdfViewerScale("1.25");
     }
 
     /**
@@ -263,6 +274,23 @@ public class OrconMacro {
             activeElement.sendKeys(Keys.chord(chord));
         } catch (RuntimeException ex) {
             logger.error(ex.getMessage());
+        }
+    }
+
+    /**
+     * PDF の表示倍率をセットする. PDF Viewer (pdfjs.robwu.nl) が必要.
+     * @param value selection value
+     */
+    private void setPdfViewerScale(String value) {
+        try {
+            WebElement frame = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.PSAREA\"]/iframe"));
+            driver.switchTo().frame(frame);
+            WebElement selectElement = driver.findElement(By.xpath("//*[@id=\"scaleSelect\"]"));
+            Select select = new Select((selectElement));
+            select.selectByValue(value);
+            driver.switchTo().defaultContent();
+        } catch (RuntimeException ex) {
+            System.err.println(ex.getMessage());
         }
     }
 

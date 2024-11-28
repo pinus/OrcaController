@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,9 +60,22 @@ public class OrconMacro {
             args.add(String.format("--window-size=%d,%d", bounds.width, bounds.height));
             option.addArguments(args);
 
-            File extensionsDir = new File(System.getProperty("user.dir") + "/chrome/extensions/");
-            File[] extensions = extensionsDir.listFiles();
-            Stream.of(extensions).forEach(option::addExtensions);
+            // load chrome extensions
+            try {
+                Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+                String userDir = path.getFileName().toString().contains(".jar")
+                    ? path.getParent().toString()
+                    : System.getProperty("user.dir");
+
+                File extensionsDir = new File(userDir + "/chrome/extensions/");
+                File[] extensions = extensionsDir.listFiles();
+                if (extensions != null) {
+                    Stream.of(extensions).forEach(option::addExtensions);
+                }
+
+            } catch (URISyntaxException ex) {
+                ex.printStackTrace(System.err);
+            }
 
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));

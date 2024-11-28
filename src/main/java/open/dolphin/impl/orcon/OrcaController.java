@@ -122,7 +122,7 @@ public class OrcaController { //extends AbstractMainComponent {
     }
 
     public static void main(String[] args) {
-        //redirectConsole();
+        redirectConsole();
         OrcaController orcon = new OrcaController();
         orcon.start();
         Preferences prefs = Preferences.userNodeForPackage(OrconProperties.class);

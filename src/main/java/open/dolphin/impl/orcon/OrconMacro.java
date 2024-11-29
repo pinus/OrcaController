@@ -168,6 +168,9 @@ public class OrconMacro {
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
         sendThrough(Keys.F8);
+        sendThrough(Keys.F8);
+        sendThrough(Keys.F8);
+        sendThrough(Keys.F8);
         setPdfViewerScale("1.25");
     }
 

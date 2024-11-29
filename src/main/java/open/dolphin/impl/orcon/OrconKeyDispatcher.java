@@ -172,7 +172,7 @@ public class OrconKeyDispatcher implements KeyEventDispatcher {
             }
 
         } else if (is(keyCode, "alt meta A")) {
-            // shift + command + A で 全選択
+            // alt + command + A で 全選択
             if (e.getID() == KeyEvent.KEY_RELEASED) {
                 orconMacro.sendThrough(Keys.chord(Keys.META, "A"));
             }

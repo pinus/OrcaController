@@ -6,7 +6,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -33,6 +32,7 @@ import static open.dolphin.impl.orcon.OrcaElements.*;
 public class OrconMacro {
     private WebDriver driver;
     private WebDriverWait wait;
+    private WebDriverWait wait20sec;
     private final OrcaController context;
     private final OrconPanel panel;
     private final OrconProperties props;
@@ -79,7 +79,8 @@ public class OrconMacro {
 
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
-            wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+            wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            wait20sec = new WebDriverWait(driver, Duration.ofSeconds(20));
 
             driver.get(panel.getAddressField().getText());
             WebElement user = driver.findElement(By.id("user"));
@@ -114,16 +115,10 @@ public class OrconMacro {
      */
     public void backToGyomu() {
         logger.info("業務メニューに戻る");
-
-        PageUpdated pageUpdated = new PageUpdated();
-        String presentPageTitle = driver.getTitle();
-
-        while (!presentPageTitle.contains(業務メニューキー.id)) {
-            WebElement back = findButtonElement("戻る");
+        WebElement back = findButtonElement("戻る");
+        while (!back.getDomAttribute("id").contains(業務メニューキー.id)) {
             back.click();
-            pageUpdated.setOldWhereAmI(presentPageTitle);
-            wait.until(pageUpdated);
-            presentPageTitle = driver.getTitle();
+            back = findButtonElement("戻る");
         }
     }
 
@@ -132,20 +127,24 @@ public class OrconMacro {
      */
     public void m01ToKanjasu() {
         logger.info("患者数一覧表");
+        backToGyomu();
         WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
         m01selnum.sendKeys("52", Keys.ENTER);
-        WebElement g01 = driver.findElement(By.id(患者数一覧表.id));
-        Actions action = new Actions(driver);
-        action.moveToElement(g01).click().build().perform(); // g01.click() cause ElementClickInterceptedException
-        sendThrough(Keys.F12);
+
+        WebElement g01 = driver.findElement(By.xpath("//*[@id=\"G01.fixed\"]/label[7]"));
+        g01.click(); // 患者数一覧チェックボックスクリック
+
+        sendThrough(Keys.F12); // 処理開始
         wait.until(ExpectedConditions.elementToBeClickable(By.id(プレビューGID2.id)));
         sendThrough(Keys.F10);
         WebElement preview = driver.findElement(By.id(プレビューG99.id));
-        wait.until(ExpectedConditions.elementToBeClickable(preview));
+        wait20sec.until(ExpectedConditions.elementToBeClickable(preview));
         preview.click();
+        // 行選択番号
+        WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
+        selnum.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, "1", Keys.ENTER);
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
-        sendThrough(Keys.F8);
         setPdfViewerScale("1.25");
     }
 
@@ -154,23 +153,31 @@ public class OrconMacro {
      */
     public void m01ToNikkei() {
         logger.info("日計表");
+        backToGyomu();
         WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
         m01selnum.sendKeys("51", Keys.ENTER);
-        WebElement l01 = driver.findElement(By.id(日計表.id));
-        Actions action = new Actions(driver);
-        action.moveToElement(l01).click().build().perform(); // g01.click() cause ElementClickInterceptedException
+        // for debug
+        //WebElement para011 = driver.findElement(By.xpath("//*[@id=\"L01.fixed.PARA011\"]"));
+        //para011.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, "R6.11.30");
+
+        WebElement l01 = driver.findElement(By.xpath("//*[@id=\"L01.fixed\"]/label[1]"));
+        l01.click(); // 日計表チェックボックスクリック
+
         sendThrough(Keys.F12);
         wait.until(ExpectedConditions.elementToBeClickable(By.id(プレビューLID2.id)));
         sendThrough(Keys.F10);
         WebElement preview = driver.findElement(By.id(プレビューL99.id));
-        wait.until(ExpectedConditions.elementToBeClickable(preview));
+        wait20sec.until(ExpectedConditions.elementToBeClickable(preview));
         preview.click();
 
+        // 最終行を選択
+        try { Thread.sleep(300); } catch (Exception e) {} // 全行読むのに時間かかる
+        WebElement clist = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.scrolledwindow26.CLIST\"]/tbody"));
+        int size = clist.findElements(By.tagName("tr")).size();
+        WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
+        selnum.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
+
         // needs extension PDF Viewer by pdfjs.robwu.nl
-        sendThrough(Keys.F8);
-        sendThrough(Keys.F8);
-        sendThrough(Keys.F8);
-        sendThrough(Keys.F8);
         setPdfViewerScale("1.25");
     }
 
@@ -302,14 +309,18 @@ public class OrconMacro {
      */
     private void setPdfViewerScale(String value) {
         try {
+            // StaleElementReferenceException 対策 - iframe 切り替えに時間がかかる？
+            Thread.sleep(300);
+
             WebElement frame = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.PSAREA\"]/iframe"));
             driver.switchTo().frame(frame);
             WebElement selectElement = driver.findElement(By.xpath("//*[@id=\"scaleSelect\"]"));
-            Select select = new Select((selectElement));
+            Select select = new Select(selectElement);
             select.selectByValue(value);
             driver.switchTo().defaultContent();
-        } catch (RuntimeException ex) {
-            System.err.println(ex.getMessage());
+
+        } catch (RuntimeException | InterruptedException ex) {
+            ex.printStackTrace(System.err);
         }
     }
 

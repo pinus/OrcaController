@@ -91,6 +91,10 @@ public class OrcaController { //extends AbstractMainComponent {
         JButton nikkei = orconPanel.getBtn3();
         nikkei.setText("日計表");
         nikkei.addActionListener(e -> orconMacro.m01ToNikkei());
+
+        JButton rececheck = orconPanel.getBtn4();
+        rececheck.setText("レセチェック");
+        rececheck.addActionListener(e -> orconMacro.m01ToReceiptCheck());
     }
 
 //    @Override

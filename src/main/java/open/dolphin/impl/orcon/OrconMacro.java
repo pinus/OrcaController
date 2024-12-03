@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -32,7 +33,7 @@ import static open.dolphin.impl.orcon.OrcaElements.*;
 public class OrconMacro {
     private WebDriver driver;
     private WebDriverWait wait;
-    private WebDriverWait wait20sec;
+    private WebDriverWait wait60sec;
     private final OrcaController context;
     private final OrconPanel panel;
     private final OrconProperties props;
@@ -80,7 +81,7 @@ public class OrconMacro {
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
             wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-            wait20sec = new WebDriverWait(driver, Duration.ofSeconds(20));
+            wait60sec = new WebDriverWait(driver, Duration.ofSeconds(60));
 
             driver.get(panel.getAddressField().getText());
             WebElement user = driver.findElement(By.id("user"));
@@ -138,7 +139,7 @@ public class OrconMacro {
         wait.until(ExpectedConditions.elementToBeClickable(By.id(プレビューGID2.id)));
         sendThrough(Keys.F10);
         WebElement preview = driver.findElement(By.id(プレビューG99.id));
-        wait20sec.until(ExpectedConditions.elementToBeClickable(preview));
+        wait60sec.until(ExpectedConditions.elementToBeClickable(preview));
         preview.click();
         // 行選択番号
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
@@ -167,7 +168,7 @@ public class OrconMacro {
         wait.until(ExpectedConditions.elementToBeClickable(By.id(プレビューLID2.id)));
         sendThrough(Keys.F10);
         WebElement preview = driver.findElement(By.id(プレビューL99.id));
-        wait20sec.until(ExpectedConditions.elementToBeClickable(preview));
+        wait60sec.until(ExpectedConditions.elementToBeClickable(preview));
         preview.click();
 
         // 最終行を選択
@@ -186,8 +187,33 @@ public class OrconMacro {
      */
     public void m01ToShinryoKoi() {
         logger.info("診療行為入力まで進む");
+        backToGyomu();
         WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
         m01selnum.sendKeys("21", Keys.ENTER);
+    }
+
+    /**
+     * from (M01)業務メニュー to (K02)診療行為入力.
+     */
+    public void m01ToReceiptCheck() {
+        logger.info("レセプトチェック");
+        backToGyomu();
+        WebElement m01selnum = driver.findElement(By.id(業務メニュー選択番号.id));
+        m01selnum.sendKeys("41", Keys.ENTER);
+
+        LocalDate today = LocalDate.now().minusMonths(1);
+        String yearMonth = String.format("%d.%d", today.getYear(), today.getMonthValue());
+        WebElement d01sryym = driver.findElement(By.xpath("//*[@id=\"D01.fixed6.SRYYM\"]"));
+        d01sryym.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, yearMonth);
+        WebElement chkkbn = driver.findElement(By.xpath("//*[@id=\"D01.fixed6.CMB_USRCHKKBN.USRCHKKBN\"]"));
+        chkkbn.sendKeys("01", Keys.ENTER);
+        sendThrough(Keys.F12);
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"DID2.fixed1.B10\"]")));
+        sendThrough(Keys.F10);
+        WebElement done = driver.findElement(By.xpath("//*[@id=\"D99.fixed6.scrolledwindow28.JOBKANRILST\"]/tbody/tr[2]/td[2]"));
+        wait60sec.until(ExpectedConditions.textToBe(
+            By.xpath("//*[@id=\"D99.fixed6.scrolledwindow28.JOBKANRILST\"]/tbody/tr[2]/td[2]"), "帳票印刷処理"));
+        sendThrough(Keys.F12);
     }
 
     /**

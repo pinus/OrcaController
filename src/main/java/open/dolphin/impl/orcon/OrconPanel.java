@@ -3,7 +3,6 @@ package open.dolphin.impl.orcon;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.util.Objects;
 
 /**
  * ORCA Controller Panel.
@@ -131,6 +130,7 @@ public class OrconPanel {
         btn2.setEnabled(login);
         btn3.setEnabled(login);
         btn4.setEnabled(login);
+        setActive(login);
     }
 
     public JPanel getPanel() { return orconPanel; }

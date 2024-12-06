@@ -131,6 +131,9 @@ public class OrconMacro {
         WebElement m01selnum = driver.findElement(By.xpath("//*[@id=\"M01.fixed1.SELNUM\"]"));
         m01selnum.sendKeys("52", Keys.ENTER);
 
+        WebElement chohyoNum = driver.findElement(By.xpath("//*[@id=\"G01.fixed.PARA0201\"]"));
+        chohyoNum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE);
+
         WebElement g01 = driver.findElement(By.xpath("//*[@id=\"G01.fixed\"]/label[7]"));
         g01.click(); // 患者数一覧チェックボックスクリック
         sendThrough(Keys.F12); // 処理開始

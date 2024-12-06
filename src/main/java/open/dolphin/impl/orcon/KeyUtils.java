@@ -12,6 +12,8 @@ import java.util.Map;
  * @author pns
  */
 public class KeyUtils {
+    public static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+
     /**
      * KeyCode -> Selenium Keys のマップ
      */
@@ -120,5 +122,9 @@ public class KeyUtils {
             System.err.println("Invalid VK string: " + vkString);
         }
         return -1;
+    }
+
+    public static CharSequence selectAll() {
+        return isWindows? Keys.chord(Keys.CONTROL, "A"): Keys.chord(Keys.META, "A");
     }
 }

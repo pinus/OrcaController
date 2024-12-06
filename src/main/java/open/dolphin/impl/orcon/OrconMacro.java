@@ -145,7 +145,7 @@ public class OrconMacro {
 
         // 行選択番号
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
-        selnum.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, "1", Keys.ENTER);
+        selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, "1", Keys.ENTER);
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
         setPdfViewerScale("1.25");
@@ -178,7 +178,7 @@ public class OrconMacro {
         WebElement clist = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.scrolledwindow26.CLIST\"]/tbody"));
         int size = clist.findElements(By.tagName("tr")).size();
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
-        selnum.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
+        selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
         setPdfViewerScale("1.25");
@@ -208,7 +208,7 @@ public class OrconMacro {
         LocalDate today = LocalDate.now().minusMonths(1);
         String yearMonth = String.format("%d.%d", today.getYear(), today.getMonthValue());
         WebElement d01sryym = driver.findElement(By.xpath("//*[@id=\"D01.fixed6.SRYYM\"]"));
-        d01sryym.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE, yearMonth);
+        d01sryym.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, yearMonth);
         WebElement chkkbn = driver.findElement(By.xpath("//*[@id=\"D01.fixed6.CMB_USRCHKKBN.USRCHKKBN\"]"));
         chkkbn.sendKeys("01", Keys.ENTER);
         sendThrough(Keys.F12);
@@ -269,7 +269,7 @@ public class OrconMacro {
         }
         // 見つかったら コマンド-A で全選択, 削除
         if (target!= null) {
-            target.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE);
+            target.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE);
         }
     }
 

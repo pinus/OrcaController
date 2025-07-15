@@ -14,15 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.io.File;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * マクロ.
@@ -59,26 +54,27 @@ public class OrconMacro {
             args.add(String.format("--window-size=%d,%d", bounds.width, bounds.height));
             option.addArguments(args);
 
-            // load chrome extensions
-            try {
-                Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
-                String userDir = path.getFileName().toString().contains(".jar")
-                    ? path.getParent().toString()
-                    : System.getProperty("user.dir");
-
-                File extensionsDir = new File(userDir + "/chrome/extensions/");
-                File[] extensions = extensionsDir.listFiles();
-                if (extensions != null) {
-                    Stream.of(extensions).forEach(option::addExtensions);
-                }
-
-            } catch (URISyntaxException ex) {
-                ex.printStackTrace(System.err);
-            }
+//            // load chrome extensions
+//            try {
+//                Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+//                String userDir = path.getFileName().toString().contains(".jar")
+//                    ? path.getParent().toString()
+//                    : System.getProperty("user.dir");
+//
+//                File extensionsDir = new File(userDir + "/chrome/extensions/");
+//                File[] extensions = extensionsDir.listFiles();
+//                if (extensions != null) {
+//                    Stream.of(extensions).forEach(option::addExtensions);
+//                    Stream.of(extensions).forEach(f -> logger.info("load extension: " + f.getName()));
+//                }
+//
+//            } catch (URISyntaxException ex) {
+//                ex.printStackTrace(System.err);
+//            }
 
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
-            wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             wait60sec = new WebDriverWait(driver, Duration.ofSeconds(60));
 
             driver.get(panel.getAddressField().getText());
@@ -131,11 +127,12 @@ public class OrconMacro {
         WebElement m01selnum = driver.findElement(By.xpath("//*[@id=\"M01.fixed1.SELNUM\"]"));
         m01selnum.sendKeys("52", Keys.ENTER);
 
-        WebElement chohyoNum = driver.findElement(By.xpath("//*[@id=\"G01.fixed.PARA0201\"]"));
-        chohyoNum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE);
-
         WebElement g01 = driver.findElement(By.xpath("//*[@id=\"G01.fixed\"]/label[7]"));
         g01.click(); // 患者数一覧チェックボックスクリック
+
+        WebElement chohyoNum = driver.findElement(By.xpath("//*[@id=\"G01.fixed.PARA0201\"]"));
+        chohyoNum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE); // 出力帳票の数値をクリア
+
         sendThrough(Keys.F12); // 処理開始
 
         WebElement preview = driver.findElement(By.xpath("//*[@id=\"GID2.fixed1.B10\"]"));

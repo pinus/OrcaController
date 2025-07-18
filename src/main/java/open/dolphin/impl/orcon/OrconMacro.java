@@ -14,10 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * マクロ.
@@ -52,25 +57,29 @@ public class OrconMacro {
             List<String> args = new ArrayList<>();
             args.add(String.format("--window-position=%d,%d", bounds.x, bounds.y));
             args.add(String.format("--window-size=%d,%d", bounds.width, bounds.height));
+
+            // Chrome team removes --load-extension switch on Chrome builds
+            // https://github.com/SeleniumHQ/selenium/issues/15788
+            args.add("--disable-features=DisableLoadExtensionCommandLineSwitch");
             option.addArguments(args);
 
-//            // load chrome extensions
-//            try {
-//                Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
-//                String userDir = path.getFileName().toString().contains(".jar")
-//                    ? path.getParent().toString()
-//                    : System.getProperty("user.dir");
-//
-//                File extensionsDir = new File(userDir + "/chrome/extensions/");
-//                File[] extensions = extensionsDir.listFiles();
-//                if (extensions != null) {
-//                    Stream.of(extensions).forEach(option::addExtensions);
-//                    Stream.of(extensions).forEach(f -> logger.info("load extension: " + f.getName()));
-//                }
-//
-//            } catch (URISyntaxException ex) {
-//                ex.printStackTrace(System.err);
-//            }
+            // load chrome extensions
+            try {
+                Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+                String userDir = path.getFileName().toString().contains(".jar")
+                    ? path.getParent().toString()
+                    : System.getProperty("user.dir");
+
+                File extensionsDir = new File(userDir + "/chrome/extensions/");
+                File[] extensions = extensionsDir.listFiles(f -> f.getName().endsWith(".crx"));
+                if (extensions != null) {
+                    Stream.of(extensions).forEach(option::addExtensions);
+                    Stream.of(extensions).forEach(f -> logger.info("load extension: " + f.getName()));
+                }
+
+            } catch (URISyntaxException ex) {
+                ex.printStackTrace(System.err);
+            }
 
             driver = new ChromeDriver(option);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
@@ -148,7 +157,7 @@ public class OrconMacro {
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, "1", Keys.ENTER);
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
-        setPdfViewerScale("1.25");
+        setPdfViewerScale("1");
     }
 
     /**
@@ -181,7 +190,7 @@ public class OrconMacro {
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
-        setPdfViewerScale("1.25");
+        setPdfViewerScale("page-width");
     }
 
     /**
@@ -313,7 +322,8 @@ public class OrconMacro {
 
     /**
      * PDF の表示倍率をセットする. PDF Viewer (pdfjs.robwu.nl) が必要.
-     * @param value selection value
+     *
+     * @param value auto, page-actual, page-fit, page-width, 0.5, 0.75, 1, 1.25, 2, 3, 4
      */
     private void setPdfViewerScale(String value) {
         try {

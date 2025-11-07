@@ -4,6 +4,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.bidi.webextension.ExtensionPath;
+import org.openqa.selenium.bidi.webextension.InstallExtensionParameters;
+import org.openqa.selenium.bidi.webextension.WebExtension;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -22,7 +25,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * マクロ.
@@ -60,10 +62,19 @@ public class OrconMacro {
 
             // Chrome team removes --load-extension switch on Chrome builds
             // https://github.com/SeleniumHQ/selenium/issues/15788
-            args.add("--disable-features=DisableLoadExtensionCommandLineSwitch");
+            // args.add("--disable-features=DisableLoadExtensionCommandLineSwitch"); // doesn't work anymore
+            args.add("--remote-debugging-pipe"); // Enables BiDi communication
+            args.add("--enable-unsafe-extension-debugging"); // Required for BiDi communication
             option.addArguments(args);
+            option.enableBiDi(); // Enable BiDi protocol
+
+            driver = new ChromeDriver(option);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
+            wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait60sec = new WebDriverWait(driver, Duration.ofSeconds(60));
 
             // load chrome extensions
+            WebExtension webExtension = new WebExtension(driver);
             try {
                 Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
                 String userDir = path.getFileName().toString().contains(".jar")
@@ -71,20 +82,17 @@ public class OrconMacro {
                     : System.getProperty("user.dir");
 
                 File extensionsDir = new File(userDir + "/chrome/extensions/");
-                File[] extensions = extensionsDir.listFiles(f -> f.getName().endsWith(".crx"));
+                File[] extensions = extensionsDir.listFiles(File::isDirectory);
                 if (extensions != null) {
-                    Stream.of(extensions).forEach(option::addExtensions);
-                    Stream.of(extensions).forEach(f -> logger.info("load extension: " + f.getName()));
+                    for (File file : extensions) {
+                        logger.info("load extension: {}", file.getPath());
+                        webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath())));
+                    }
                 }
 
             } catch (URISyntaxException ex) {
                 ex.printStackTrace(System.err);
             }
-
-            driver = new ChromeDriver(option);
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(300));
-            wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            wait60sec = new WebDriverWait(driver, Duration.ofSeconds(60));
 
             driver.get(panel.getAddressField().getText());
             WebElement user = driver.findElement(By.id("user"));
@@ -156,8 +164,10 @@ public class OrconMacro {
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, "1", Keys.ENTER);
 
+        sendThrough(Keys.F3); // 横表示
+
         // needs extension PDF Viewer by pdfjs.robwu.nl
-        setPdfViewerScale("1");
+//        setPdfViewerScale("1");
     }
 
     /**
@@ -189,8 +199,10 @@ public class OrconMacro {
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
 
+        sendThrough(Keys.F3); // 横表示
+
         // needs extension PDF Viewer by pdfjs.robwu.nl
-        setPdfViewerScale("page-width");
+        //setPdfViewerScale("page-width");
     }
 
     /**

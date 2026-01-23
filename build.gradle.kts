@@ -83,6 +83,6 @@ dependencies {
     implementation("org.seleniumhq.selenium:selenium-java:4.38.0")
     implementation("io.github.bonigarcia:webdrivermanager:6.3.2")
     implementation("ch.qos.logback:logback-classic:1.5.19")
-    implementation("commons-io:commons-io:2.20.0")
+    implementation("commons-io:commons-io:2.21.0")
     implementation("com.formdev:flatlaf:3.6.2")
 }

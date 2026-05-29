@@ -279,9 +279,15 @@ public class OrconMacro {
     public void k02GairaiKanriDelete() {
         logger.info("外来管理加算削除");
         // list of "入力コード" column
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[2]/div/div/div[2]/div[6]/div/div[19]/table/tbody/tr/td[2]/input")));
         List<WebElement> elements = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div[6]/div/div[19]/table/tbody/tr/td[2]/input"));
+        if (elements.isEmpty()) {
+            logger.warn("外来管理加算削除: 入力コード欄が見つかりません");
+            return;
+        }
+
         WebElement target = null;
-        for (int r=0; r<10; r++) {
+        for (int r = 0; r < elements.size(); r++) {
             // 112011010 外来管理加算コード検索
             if ("112011010".equals(elements.get(r).getAttribute("value"))) {
                 target = elements.get(r);
@@ -290,7 +296,7 @@ public class OrconMacro {
         }
         // 見つかったら コマンド-A で全選択, 削除
         if (target!= null) {
-            target.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE);
+            target.sendKeys(Keys.chord(Keys.META, "A"), Keys.BACK_SPACE);
         }
     }
 

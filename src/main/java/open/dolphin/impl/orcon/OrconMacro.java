@@ -86,7 +86,8 @@ public class OrconMacro {
                 if (extensions != null) {
                     for (File file : extensions) {
                         logger.info("load extension: {}", file.getPath());
-                        webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath())));
+                        //webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath())));
+                        Thread.ofPlatform().start(() -> webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath()))));
                     }
                 }
 

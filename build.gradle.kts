@@ -9,7 +9,7 @@ val buildDate:String = SimpleDateFormat("yyyyMMddHHmm").format(Date())
 plugins {
     application
     kotlin("jvm") version "2.3.10"
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.4.2"
 }
 
 application {

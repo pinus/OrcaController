@@ -38,7 +38,7 @@ public class OrcaController { //extends AbstractMainComponent {
         UIManager.put( "Component.focusWidth", 2);
         UIManager.put( "TextComponent.arc", 8 );
         UIManager.put( "Button.arc", 8 );
-        Thread.ofVirtual().start(() -> {
+        Thread.ofPlatform().start(() -> {
             logger.info("Setting up chrome driver...");
             WebDriverManager.chromedriver().setup();
             logger.info("Chrome driver setting up done");

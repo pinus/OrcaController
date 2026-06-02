@@ -1,9 +1,6 @@
 package open.dolphin.impl.orcon;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.bidi.webextension.ExtensionPath;
 import org.openqa.selenium.bidi.webextension.InstallExtensionParameters;
 import org.openqa.selenium.bidi.webextension.WebExtension;
@@ -17,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.awt.Rectangle;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -86,8 +84,7 @@ public class OrconMacro {
                 if (extensions != null) {
                     for (File file : extensions) {
                         logger.info("load extension: {}", file.getPath());
-                        //webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath())));
-                        Thread.ofPlatform().start(() -> webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath()))));
+                        webExtension.install(new InstallExtensionParameters(new ExtensionPath(file.getPath())));
                     }
                 }
 
@@ -165,10 +162,10 @@ public class OrconMacro {
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, "1", Keys.ENTER);
 
-        sendThrough(Keys.F3); // 横表示
+        openPdfViewerInNewTab();
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
-//        setPdfViewerScale("1");
+        // setPdfViewerScale("1");
     }
 
     /**
@@ -200,10 +197,31 @@ public class OrconMacro {
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
 
-        sendThrough(Keys.F3); // 横表示
+        openPdfViewerInNewTab();
 
         // needs extension PDF Viewer by pdfjs.robwu.nl
         //setPdfViewerScale("page-width");
+    }
+
+    /**
+     * Opens the PDF viewer in a new browser tab.
+     * The method waits for the presence of an iframe with a source URL that starts
+     * with a specific prefix, retrieves the URL from the iframe, and opens it in a new tab.
+     * If the URL is null or blank, a warning will be logged and the operation will end.
+     */
+    private void openPdfViewerInNewTab() {
+        WebElement frame = wait60sec.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("iframe[src^='chrome-extension://']")
+        ));
+
+        String viewerUrl = frame.getDomAttribute("src");
+        if (viewerUrl == null || viewerUrl.isBlank()) {
+            logger.warn("PDF viewer URL is empty");
+            return;
+        }
+
+        logger.info("open PDF viewer in new tab: {}", viewerUrl);
+        ((JavascriptExecutor) driver).executeScript("window.open(arguments[0], '_blank');", viewerUrl);
     }
 
     /**

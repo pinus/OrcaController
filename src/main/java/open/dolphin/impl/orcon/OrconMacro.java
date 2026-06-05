@@ -197,6 +197,7 @@ public class OrconMacro {
         WebElement selnum = driver.findElement(By.xpath("//*[@id=\"XC01.fixed32.SELNUM\"]"));
         selnum.sendKeys(KeyUtils.selectAll(), Keys.BACK_SPACE, String.valueOf(size), Keys.ENTER);
 
+        try { Thread.sleep(1000); } catch (Exception e) {}
         openPdfViewerInNewTab();
 
         // needs extension PDF Viewer by pdfjs.robwu.nl

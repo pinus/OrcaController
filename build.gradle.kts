@@ -8,8 +8,8 @@ val buildDate:String = SimpleDateFormat("yyyyMMddHHmm").format(Date())
 
 plugins {
     application
-    kotlin("jvm") version "2.3.10"
-    id("com.gradleup.shadow") version "9.4.2"
+    kotlin("jvm") version "2.4.10"
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 application {
@@ -80,9 +80,9 @@ tasks {
 }
 
 dependencies {
-    implementation("org.seleniumhq.selenium:selenium-java:4.44.0")
+    implementation("org.seleniumhq.selenium:selenium-java:4.46.0")
     implementation("io.github.bonigarcia:webdrivermanager:6.3.4")
-    implementation("ch.qos.logback:logback-classic:1.5.33")
+    implementation("ch.qos.logback:logback-classic:1.6.1")
     implementation("commons-io:commons-io:2.22.0")
-    implementation("com.formdev:flatlaf:3.7.1")
+    implementation("com.formdev:flatlaf:3.7.2")
 }

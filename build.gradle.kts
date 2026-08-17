@@ -82,7 +82,7 @@ tasks {
 dependencies {
     implementation("org.seleniumhq.selenium:selenium-java:4.46.0")
     implementation("io.github.bonigarcia:webdrivermanager:6.3.4")
-    implementation("ch.qos.logback:logback-classic:1.6.1")
+    implementation("ch.qos.logback:logback-classic:1.6.2")
     implementation("commons-io:commons-io:2.22.0")
     implementation("com.formdev:flatlaf:3.7.2")
 }
